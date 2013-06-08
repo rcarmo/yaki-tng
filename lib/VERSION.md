@@ -1,5 +1,7 @@
 # Third-Party Libraries
 
+* [InK][i] CSS/JS framework
+
 * bottle.py - [Bottle][b] 0.12-dev
 * dispatch
 * markup
@@ -22,6 +24,7 @@
 * utils
     *.py
 
+[i]: http://ink.sapo.pt
 [b]: http://bottlepy.org
 [bs]: http://www.crummy.com/software/BeautifulSoup/
 [md]: https://pypi.python.org/pypi/Markdown
