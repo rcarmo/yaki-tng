@@ -1023,10 +1023,10 @@ body.animated *[class*=large-] {
 }
 body {
   color: #555555;
-  font-family: Ubuntu, Arial, sans-serif;
+  font-family: Arial, sans-serif;
 }
 .sans {
-  font-family: Ubuntu, Arial, sans-serif;
+  font-family: Arial, sans-serif;
 }
 .serif {
   font-family: Times, "Times New Roman", serif;
