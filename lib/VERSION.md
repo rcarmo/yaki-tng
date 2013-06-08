@@ -3,7 +3,7 @@
 * bottle.py - [Bottle][b] 0.12-dev
 * dispatch
 * markup
-    * bs4 - [BeautifulSoup][bs] 4.1.3
+    * bs4 - [BeautifulSoup][bs] 4.2.1
     * cssmin.py
     * detextile.py
     * feedparser.py, sgmllib3.py - [FeedParser][5.1.3] 5.1.3
