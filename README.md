@@ -1,9 +1,30 @@
 yaki-tng
 ========
 
-A modern, revamped implementation of Yaki
+A modern, revamped implementation of [Yaki][y].
 
+## Main goals
 
+* Move to a standard WSGI app model, using [Bottle][b] as both routing and templating engine
+* Streamline the markup rendering pipeline
+* Move all the cache management to an external process (Redis, Memcache, etc. - your choice)
+* Split the indexer from the main body of code
+* Get it running at insanely high speeds inside `uWSGI+gevent` or `Gunicorn+gevent` (and PyPy)
+
+## Secondary Goals
+
+* Refactor all the configuration to use JSON
+* Refactor all the inline logic according to MVC patterns
+* Provide a set of APIs for gathering data
+* Increase resiliency (lower RAM footprint, better horizontal scaling, better fault tolerance, etc.)
+* Python 3 support (eventually, I'm actually aiming for PyPy)
+
+## Target Feature Set
+
+* Support for (Multi)Markdown, Textile, raw HTML, etc.
+* Flexible set of plugins
+* Pygments integration (for technical documentation)
+* Full-text indexing
 
 ## Batteries included
 
@@ -14,3 +35,6 @@ Yaki has always been designed around three simple rules:
 * No databases
 
 All of these are, of course, applied within reason.
+
+[b]: http://bottlepy.org
+[y]: https://github.com/rcarmo/yaki
