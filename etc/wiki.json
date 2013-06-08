@@ -24,23 +24,17 @@
                 "formatter": "http",
                 "level"    : "DEBUG",
                 "stream"   : "ext://sys.stdout"
-            },
-            "ram": {
-                "class"    : "utils.InMemoryHandler",
-                "formatter": "http",
-                "level"    : "WARNING",
-                "limit"    : 200
             }
         },
         "loggers": {
             "whoosh": {
                 "level"   : "DEBUG",
-                "handlers": ["ram","console"]
+                "handlers": ["console"]
             }
         },
         "root": {
             "level"   : "DEBUG",
-            "handlers": ["ram","console"]
+            "handlers": ["console"]
         }
     }
 }
