@@ -14,6 +14,9 @@ from config import settings
 
 from utils import path_for
 from yaki import Store
+from yaki.decorators import render
+
+from decorators import timed
 
 
 @route('/')
@@ -23,7 +26,11 @@ def root():
 
 
 @route('/space/<page:path>')
-#@view('wiki')
+@timed
+#@redis_cache('html')
+@view('wiki')
+#@redis_cache('markup')
+@render()
 def wiki(page):
     s = Store(path_for(settings.content.path))
     try:

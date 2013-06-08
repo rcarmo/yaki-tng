@@ -63,10 +63,9 @@ def makeUnique(seq, transform=None):
 def render_markup(raw, markup=u'text/html'):
     # Allow module to load regardless of textile or markdown support
     try:
-        import textile
-        import smartypants
-        import markdown
-        import mdx_smartypants
+        from markup import textile
+        from markup import smartypants
+        from markup import markdown
     except ImportError:
         pass
 

@@ -4,16 +4,16 @@
 import os, sys, logging
 from bottle import app, route, redirect, static_file, view
 
+from utils import path_for
+
 log = logging.getLogger()
 
 @route('/')
 def index():
-    redirect("/space/HomePage")
-    """Index page"""
-    return static_file('index.html', root='static')
+    redirect("/space/start")
 
-@route('<filepath:path>')
+@route('/static/<filepath:path>')
 def static(filepath):
     """Handles all the remanining static files"""
-    return static_file(filepath, root='static')
+    return static_file(filepath, root=path_for('static'))
 
