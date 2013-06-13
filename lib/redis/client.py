@@ -5,6 +5,7 @@ from socket import create_connection
 class RedisClient(object):
     def __init__(self, host='localhost', port=6379):
         self.sock = create_connection((host, port))
+        self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         self.file = self.sock.makefile()
 
     def __getattr__(self, attr):
