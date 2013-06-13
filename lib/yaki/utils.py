@@ -19,13 +19,7 @@ import yaki.Locale
 # File utility functions
 #
 
-def locate(pattern, root=os.getcwd()):
-  """
-  Generator for iterating inside a file tree
-  """
-  for path, dirs, files in os.walk(root):
-    for filename in [os.path.abspath(os.path.join(path, filename)) for filename in files if fnmatch.fnmatch(filename, pattern)]:
-      yield filename
+
 
 #
 # Wild Wild Web
