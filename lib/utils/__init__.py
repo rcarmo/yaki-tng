@@ -12,4 +12,4 @@ import os, sys, logging
 log = logging.getLogger()
 
 # export submodule symbols
-from core import Struct, get_config, path_for
+from core import Struct, get_config, path_for, locate
