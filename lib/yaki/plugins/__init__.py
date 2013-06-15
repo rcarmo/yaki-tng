@@ -13,43 +13,42 @@ import os, sys, re, logging
 
 log = logging.getLogger()
 
-from config import settings
-
 from utils import path_for, locate
 
-class PluginRegistry:
+class Registry:
     plugins = {'markup': {}}
     serial = 0
     
     def __init__(self, settings):
-        """Load wiki plugins. Assumptions are that they are inside the plugins directory 
-             under the yaki tree, in userlibs, so we can use standard import..."""
-        print "Loading Wiki plugins..."
+        """Load wiki plugins. Assumptions are that they are alongside this file, under the yaki tree"""
+        log.info("Loading Wiki plugins...")
         # Get plugin directory
-        path = path_for(settings.plugins.path)
-        sys.path.insert(0,path)
+        path = os.path.dirname(__file__)
         for f in locate('*.py', path):
-            (modname,ext) = rsplit(os.path.basename(path), '.', 1)
-            #print modname
+            (modname,ext) = os.path.basename(f).rsplit('.', 1)
+            log.debug("module: %s" % modname)
             try:
                 _module = __import__(modname, globals(), locals(), [''])
-                # Load each python file
                 for x in dir(_module):
-                    if 'WikiPlugin' in x:
+                    if 'Plugin' in x:
                         _class = getattr(_module, x)
-                        _class(self,webapp) # plugins will register themselves
+                        _class(self, settings)
             except ImportError:
                 pass
-        sys.path.pop()
         
+    
     def register(self, category, instance, tag, name):
-        #print "Plugin %s registered in category %s for tag %s" % (name,category,tag)
+        """Registration callback for plugins"""
+
+        log.debug("Plugin %s registered in category %s for tag %s" % (name,category,tag))
         if tag not in self.plugins[category].keys():
             self.plugins[category][tag] = {}
         self.plugins[category][tag][name.lower()] = instance
     
-    def runForAllTags(self, pagename, soup, request=None, response=None, indexing=False):
+    
+    def run_for_all_tags(self, pagename, soup, request=None, response=None, indexing=False):
         """Runs all markup plugins that process specific tags (except the plugin one)"""
+
         for tagname in self.plugins['markup'].keys():
             if tagname != 'plugin':
                 order = self.plugins['markup'][tagname].keys()
@@ -63,7 +62,10 @@ class PluginRegistry:
                         if result == True:
                             continue
 
+
     def run(self, tag, tagname, pagename = None, soup = None, request=None, response=None, indexing=False):
+        """Run each plugin"""
+
         if tagname == 'plugin':
             try:
                 name = tag['name'].lower() # get the attribute
@@ -73,7 +75,7 @@ class PluginRegistry:
                 plugin = self.plugins['markup']['plugin'][name]
                 if not indexing:
                     result = plugin.run(self.serial, tag, tagname, pagename, soup, request, response)
-                    self.serial = self.serial + 1
+                    self.serial += 1
                 else:
                     tag.replaceWith('')
                 # ignore the result for plugin tags
@@ -86,11 +88,14 @@ class PluginRegistry:
                 if result == False:
                     return
 
-class WikiPlugin:
+
+class Plugin:
     """Base class for all Wiki plugins"""
-    def __init__(self, registry, webapp):
+
+    def __init__(self, registry, settings):
         # Register this (override in child classes)
         registry.register('markup',self, 'plugin', 'base')  
+
     def run(self, serial, tag, tagname, pagename, soup, request = None, response = None, indexing = False):
         pass
     
