@@ -69,12 +69,20 @@ def get_config(filename=None):
     return config
 
 
-def path_for(name,script=__file__):
+def path_for(name, script=__file__):
     """Build absolute paths to resources based on app path"""
 
     if 'uwsgi' in sys.argv:
         return os.path.join(os.path.abspath(os.path.join(os.path.dirname(script),'..')),name)
     return os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]),name))
+
+
+def locate(pattern, root=os.getcwd()):
+    """Generator for iterating inside a file tree"""
+
+    for path, dirs, files in os.walk(root):
+        for filename in [os.path.abspath(os.path.join(path, filename)) for filename in files if fnmatch.fnmatch(filename, pattern)]:
+            yield filename
 
 
 def safe_eval(buffer):

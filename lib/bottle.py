@@ -41,6 +41,7 @@ import base64, cgi, email.utils, functools, hmac, imp, itertools, mimetypes,\
 from datetime import date as datedate, datetime, timedelta
 from tempfile import TemporaryFile
 from traceback import format_exc, print_exc
+from inspect import getargspec
 
 try: from simplejson import dumps as json_dumps, loads as json_lds
 except ImportError: # pragma: no cover
@@ -84,6 +85,7 @@ if py3k:
     from collections import MutableMapping as DictMixin
     import pickle
     from io import BytesIO
+    from configparser import ConfigParser
     basestring = str
     unicode = str
     json_loads = lambda s: json_lds(touni(s))
@@ -99,6 +101,7 @@ else: # 2.x
     from itertools import imap
     import cPickle as pickle
     from StringIO import StringIO as BytesIO
+    from ConfigParser import SafeConfigParser as ConfigParser
     if py25:
         msg = "Python 2.5 support may be dropped in future versions of Bottle."
         warnings.warn(msg, DeprecationWarning)
@@ -242,7 +245,7 @@ def _re_flatten(p):
     ''' Turn all capturing groups in a regular expression pattern into
         non-capturing groups. '''
     if '(' not in p: return p
-    return re.sub(r'(\\*)(\(\?P<[^>]*>|\((?!\?))',
+    return re.sub(r'(\\*)(\(\?P<[^>]+>|\((?!\?))',
         lambda m: m.group(0) if len(m.group(1)) % 2 else m.group(1) + '(?:', p)
 
 
@@ -261,12 +264,17 @@ class Router(object):
     default_pattern = '[^/]+'
     default_filter  = 're'
 
+    #: The current CPython regexp implementation does not allow more
+    #: than 99 matching groups per regular expression.
+    _MAX_GROUPS_PER_PATTERN = 99
+
     def __init__(self, strict=False):
         self.rules    = [] # All rules in order
-        self._groups  = {}
+        self._groups  = {} # index of regexes to find them in dyna_routes
         self.builder  = {} # Data structure for the url builder
         self.static   = {} # Search structure for static routes
-        self.dynamic  = [] # Search structure for dynamic routes
+        self.dyna_routes   = {}
+        self.dyna_regexes  = {} # Search structure for dynamic routes
         #: If true, static routes are no longer checked first.
         self.strict_order = strict
         self.filters = {
@@ -335,8 +343,8 @@ class Router(object):
         if name: self.builder[name] = builder
 
         if is_static and not self.strict_order:
-            group = self.static.setdefault(self.build(rule), {})
-            group[method] = (target, None)
+            self.static.setdefault(method, {})
+            self.static[method][self.build(rule)] = (target, None)
             return
 
         try:
@@ -361,24 +369,30 @@ class Router(object):
             getargs = None
 
         flatpat = _re_flatten(pattern)
-        if flatpat in self._groups:
-            # Info: Rule groups with previous rule
-            group = self._groups[flatpat]
-            if method in group:
-                if DEBUG:
-                    msg = 'Route <%s %s> overwrites a previously defined route'
-                    warnings.warn(msg % (method, rule), RuntimeWarning)
-            self._groups[flatpat][method] = (target, getargs)
-            return
+        whole_rule = (rule, flatpat, target, getargs)
 
-        mdict = self._groups[flatpat] = {method: (target, getargs)}
-        
-        try:
-            combined = '%s|(^%s$)' % (self.dynamic[-1][0].pattern, flatpat)
-            self.dynamic[-1] = (re.compile(combined), self.dynamic[-1][1])
-            self.dynamic[-1][1].append(mdict)
-        except (AssertionError, IndexError): # AssertionError: Too many groups
-            self.dynamic.append((re.compile('(^%s$)' % flatpat), [mdict]))
+        if (flatpat, method) in self._groups:
+            if DEBUG:
+                msg = 'Route <%s %s> overwrites a previously defined route'
+                warnings.warn(msg % (method, rule), RuntimeWarning)
+            self.dyna_routes[method][self._groups[flatpat, method]] = whole_rule
+        else:
+            self.dyna_routes.setdefault(method, []).append(whole_rule)
+            self._groups[flatpat, method] = len(self.dyna_routes[method]) - 1
+
+        self._compile(method)
+
+    def _compile(self, method):
+        all_rules = self.dyna_routes[method]
+        comborules = self.dyna_regexes[method] = []
+        maxgroups = self._MAX_GROUPS_PER_PATTERN
+        for x in range(0, len(all_rules), maxgroups):
+            some = all_rules[x:x+maxgroups]
+            combined = (flatpat for (_, flatpat, _, _) in some)
+            combined = '|'.join('(^%s$)' % flatpat for flatpat in combined)
+            combined = re.compile(combined).match
+            rules = [(target, getargs) for (_, _, target, getargs) in some]
+            comborules.append((combined, rules))
 
     def build(self, _name, *anons, **query):
         ''' Build an URL by filling the wildcards in a rule. '''
@@ -393,32 +407,39 @@ class Router(object):
 
     def match(self, environ):
         ''' Return a (target, url_agrs) tuple or raise HTTPError(400/404/405). '''
-        path, targets, urlargs = environ['PATH_INFO'] or '/', None, {}
-        if path in self.static:
-            targets = self.static[path]
-        else:
-            for combined, rules in self.dynamic:
-                match = combined.match(path)
-                if not match: continue
-                targets = rules[match.lastindex - 1]
-                break
+        verb = environ['REQUEST_METHOD'].upper()
+        path = environ['PATH_INFO'] or '/'
+        target = None
+        methods = [verb, 'GET', 'ANY'] if verb == 'HEAD' else [verb, 'ANY']
 
-        if not targets:
-            raise HTTPError(404, "Not found: " + repr(environ['PATH_INFO']))
-        method = environ['REQUEST_METHOD'].upper()
-        if method in targets:
-            target, getargs = targets[method]
-        elif method == 'HEAD' and 'GET' in targets:
-            target, getargs = targets['GET']
-        elif 'ANY' in targets:
-            target, getargs = targets['ANY']            
-        else:
-            allowed = [verb for verb in targets if verb != 'ANY']
-            if 'GET' in allowed and 'HEAD' not in allowed:
-                allowed.append('HEAD')
-            raise HTTPError(405, "Method not allowed.", Allow=",".join(allowed))
-        
-        return target, getargs(path) if getargs else {}
+        for method in methods:
+            if method in self.static and path in self.static[method]:
+                target, getargs = self.static[method][path]
+                return target, getargs(path) if getargs else {}
+            elif method in self.dyna_regexes:
+                for combined, rules in self.dyna_regexes[method]:
+                    match = combined(path)
+                    if match:
+                        target, getargs = rules[match.lastindex - 1]
+                        return target, getargs(path) if getargs else {}
+
+        # No matching route found. Collect alternative methods for 405 response
+        allowed = set([])
+        nocheck = set(methods)
+        for method in set(self.static) - nocheck:
+            if path in self.static[method]:
+                allowed.add(verb)
+        for method in set(self.dyna_regexes) - allowed - nocheck:
+            for combined, rules in self.dyna_regexes[method]:
+                match = combined(path)
+                if match:
+                    allowed.add(method)
+        if allowed:
+            allow_header = ",".join(sorted(allowed))
+            raise HTTPError(405, "Method not allowed.", Allow=allow_header)
+
+        # No matching route and no alternative method found. We give up
+        raise HTTPError(404, "Not found: " + repr(path))
 
 
 
@@ -507,8 +528,25 @@ class Route(object):
                 update_wrapper(callback, self.callback)
         return callback
 
+    def get_undecorated_callback(self):
+        ''' Return the callback. If the callback is a decorated function, try to
+            recover the original function. '''
+        func = self.callback
+        func = getattr(func, '__func__' if py3k else 'im_func', func)
+        closure_attr = '__closure__' if py3k else 'func_closure'
+        while hasattr(func, closure_attr) and getattr(func, closure_attr):
+            func = getattr(func, closure_attr)[0].cell_contents
+        return func
+
+    def get_callback_args(self):
+        ''' Return a list of argument names the callback (most likely) accepts
+            as keyword arguments. If the callback is a decorated function, try
+            to recover the original function before inspection. '''
+        return getargspec(self.get_undecorated_callback())[0]
+
     def __repr__(self):
-        return '<%s %r %r>' % (self.method, self.rule, self.callback)
+        cb = self.get_undecorated_callback()
+        return '<%s %r %r>' % (self.method, self.rule, cb)
 
 
 
@@ -530,15 +568,22 @@ class Bottle(object):
     """
 
     def __init__(self, catchall=True, autojson=True):
-        #: If true, most exceptions are caught and returned as :exc:`HTTPError`
-        self.catchall = catchall
+
+        #: A :class:`ConfDict` for app specific configuration.
+        self.conf = ConfDict()
+        self.conf._on_change = functools.partial(self.trigger_hook, 'config')
+        self.conf.meta_set('autojson', 'validate', bool)
+        self.conf.meta_set('catchall', 'validate', bool)
+        self.conf['catchall'] = catchall
+        self.conf['autojson'] = autojson
+
+        #: Deprecated
+        self.config = ConfigDict()
+        self.config.autojson = autojson
+        self.config.catchall = catchall
 
         #: A :class:`ResourceManager` for application files
         self.resources = ResourceManager()
-
-        #: A :class:`ConfigDict` for app specific configuration.
-        self.config = ConfigDict()
-        self.config.autojson = autojson
 
         self.routes = [] # List of installed :class:`Route` instances.
         self.router = Router() # Maps requests to :class:`Route` instances.
@@ -546,12 +591,53 @@ class Bottle(object):
 
         # Core plugins
         self.plugins = [] # List of installed plugins.
-        self.hooks = HooksPlugin()
-        self.install(self.hooks)
         if self.config.autojson:
             self.install(JSONPlugin())
         self.install(TemplatePlugin())
 
+    #: If true, most exceptions are caught and returned as :exc:`HTTPError`
+    catchall = DictProperty('conf', 'catchall')
+
+    __hook_names = 'before_request', 'after_request', 'app_reset', 'config'
+    __hook_reversed = 'after_request'
+
+    @cached_property
+    def _hooks(self):
+        return dict((name, []) for name in self.__hook_names)
+
+    def add_hook(self, name, func):
+        ''' Attach a callback to a hook. Three hooks are currently implemented:
+
+            before_request
+                Executed once before each request. The request context is
+                available, but no routing has happened yet.
+            after_request
+                Executed once after each request regardless of its outcome.
+            app_reset
+                Called whenever :meth:`Bottle.reset` is called.
+        '''
+        if name in self.__hook_reversed:
+            self._hooks[name].insert(0, func)
+        else:
+            self._hooks[name].append(func)
+
+    def remove_hook(self, name, func):
+        ''' Remove a callback from a hook. '''
+        if name in self._hooks and func in self._hooks[name]:
+            self._hooks[name].remove(func)
+            return True
+
+    def trigger_hook(self, __name, *args, **kwargs):
+        ''' Trigger a hook and return a list of results. '''
+        return [hook(*args, **kwargs) for hook in self._hooks[__name][:]]
+
+    def hook(self, name):
+        """ Return a decorator that attaches a callback to a hook. See
+            :meth:`add_hook` for details."""
+        def decorator(func):
+            self.add_hook(name, func)
+            return func
+        return decorator
 
     def mount(self, prefix, app, **options):
         ''' Mount an application (:class:`Bottle` or plain WSGI) to a specific
@@ -638,10 +724,6 @@ class Bottle(object):
         if removed: self.reset()
         return removed
 
-    def run(self, **kwargs):
-        ''' Calls :func:`run` with the same parameters. '''
-        run(self, **kwargs)
-
     def reset(self, route=None):
         ''' Reset all routes (force plugins to be re-applied) and clear all
             caches. If an ID or route object is given, only that specific route
@@ -652,13 +734,17 @@ class Bottle(object):
         for route in routes: route.reset()
         if DEBUG:
             for route in routes: route.prepare()
-        self.hooks.trigger('app_reset')
+        self.trigger_hook('app_reset')
 
     def close(self):
         ''' Close the application and all installed plugins. '''
         for plugin in self.plugins:
             if hasattr(plugin, 'close'): plugin.close()
         self.stopped = True
+
+    def run(self, **kwargs):
+        ''' Calls :func:`run` with the same parameters. '''
+        run(self, **kwargs)
 
     def match(self, environ):
         """ Search for a matching route and return a (:class:`Route` , urlargs)
@@ -744,19 +830,6 @@ class Bottle(object):
             return handler
         return wrapper
 
-    def hook(self, name):
-        """ Return a decorator that attaches a callback to a hook. Three hooks
-            are currently implemented:
-
-            - before_request: Executed once before each request
-            - after_request: Executed once after each request
-            - app_reset: Called whenever :meth:`reset` is called.
-        """
-        def wrapper(func):
-            self.hooks.add(name, func)
-            return func
-        return wrapper
-
     def handle(self, path, method='GET'):
         """ (deprecated) Execute the first matching route callback and return
             the result. :exc:`HTTPResponse` exceptions are caught and returned.
@@ -776,11 +849,17 @@ class Bottle(object):
             environ['bottle.app'] = self
             request.bind(environ)
             response.bind()
-            route, args = self.router.match(environ)
-            environ['route.handle'] = route
-            environ['bottle.route'] = route
-            environ['route.url_args'] = args
-            return route.call(**args)
+
+            try:
+                self.trigger_hook('before_request')
+                route, args = self.router.match(environ)
+                environ['route.handle'] = route
+                environ['bottle.route'] = route
+                environ['route.url_args'] = args
+                return route.call(**args)
+            finally:
+                self.trigger_hook('after_request')
+
         except HTTPResponse:
             return _e()
         except RouteReset:
@@ -1655,51 +1734,6 @@ class JSONPlugin(object):
         return wrapper
 
 
-class HooksPlugin(object):
-    name = 'hooks'
-    api  = 2
-
-    _names = 'before_request', 'after_request', 'app_reset'
-
-    def __init__(self):
-        self.hooks = dict((name, []) for name in self._names)
-        self.app = None
-
-    def _empty(self):
-        return not (self.hooks['before_request'] or self.hooks['after_request'])
-
-    def setup(self, app):
-        self.app = app
-
-    def add(self, name, func):
-        ''' Attach a callback to a hook. '''
-        was_empty = self._empty()
-        self.hooks.setdefault(name, []).append(func)
-        if self.app and was_empty and not self._empty(): self.app.reset()
-
-    def remove(self, name, func):
-        ''' Remove a callback from a hook. '''
-        was_empty = self._empty()
-        if name in self.hooks and func in self.hooks[name]:
-            self.hooks[name].remove(func)
-        if self.app and not was_empty and self._empty(): self.app.reset()
-
-    def trigger(self, name, *a, **ka):
-        ''' Trigger a hook and return a list of results. '''
-        hooks = self.hooks[name]
-        if ka.pop('reversed', False): hooks = hooks[::-1]
-        return [hook(*a, **ka) for hook in hooks]
-
-    def apply(self, callback, route):
-        if self._empty(): return callback
-        def wrapper(*a, **ka):
-            self.trigger('before_request')
-            rv = callback(*a, **ka)
-            self.trigger('after_request', reversed=True)
-            return rv
-        return wrapper
-
-
 class TemplatePlugin(object):
     ''' This plugin applies the :func:`view` decorator to all routes with a
         `template` config parameter. If the parameter is a tuple, the second
@@ -1948,6 +1982,76 @@ class WSGIHeaderDict(DictMixin):
     def __contains__(self, key): return self._ekey(key) in self.environ
 
 
+class ConfDict(dict):
+    ''' A dict-subclass with some extras.
+
+        >>> c = ConfDict()
+        >>> c['key'] = 'value'
+        >>> c.update('some.namespace', key='some value')
+        >>> print(c)
+        {'key': 'value', 'some.namespace.key':'some value'}
+    '''
+
+    __slots__ = ('_meta', '_on_change')
+
+    def __init__(self):
+        self._meta = {}
+        self._on_change = lambda name, value: None
+
+    def load_config(self, filename):
+        ''' Load an *.ini style config file.'''
+        conf = ConfigParser()
+        conf.read(filename)
+        for section in conf.sections():
+            for key, value in conf.items(section):
+                self['%s.%s' % (section, key)] = value
+
+    def update(self, *a, **ka):
+        ''' If the first parameter is a string, all keys are prefixed with this
+            string. Apart from that it works just as the usual dict.update().
+            Example: ``update('some.namespace', key='value')`` '''
+        prefix = ''
+        if a and isinstance(a[0], str):
+            prefix = a[0].strip('.') + '.'
+            a = a[1:]
+        for key, value in dict(*a, **ka).items():
+            self[prefix+key] = value
+
+    def setdefault(self, key, value):
+        if key not in self:
+            self[key] = value
+
+    def __setitem__(self, key, value):
+        if not isinstance(key, str):
+            raise TypeError('Keys must be strings')
+        filtr = self.meta_get(key, 'filter')
+        if filtr is not None:
+            value = filtr(value)
+        if key in self and self[key] is value:
+            return
+        self._on_change(key, value)
+        dict.__setitem__(self, key, value)
+
+    def __delitem__(self, key):
+        dict.__delitem__(self, key)
+        self._on_change(key, value)
+
+    def meta_get(self, key, metafield, default=None):
+        ''' Return the value of a meta field for a key. '''
+        return self._meta.get(key, {}).get(metafield, default)
+
+    def meta_set(self, key, metafield, value):
+        ''' Set the meta field for a key to a new value. This triggers the
+            on-change handler for existing keys. '''
+        self._meta.setdefault(key, {})[metafield] = value
+        if key in self:
+            self[key] = self[key]
+
+    def meta_list(self, key):
+        ''' Return an iterable of meta field names defined for a key. '''
+        return self._meta.get(key, {}).keys()
+
+
 class ConfigDict(dict):
     ''' A dict-subclass with some extras: You can access keys like attributes.
         Uppercase attributes create new ConfigDicts and act as name-spaces.
@@ -2152,7 +2256,7 @@ class FileUpload(object):
             buf = read(chunk_size)
             if not buf: break
             write(buf)
-        self.file.seek(offset)    
+        self.file.seek(offset)
 
     def save(self, destination, overwrite=False, chunk_size=2**16):
         ''' Save file to disk or copy its content to an open file(-like) object.
@@ -2384,18 +2488,17 @@ def yieldroutes(func):
     takes optional keyword arguments. The output is best described by example::
 
         a()         -> '/a'
-        b(x, y)     -> '/b/:x/:y'
-        c(x, y=5)   -> '/c/:x' and '/c/:x/:y'
-        d(x=5, y=6) -> '/d' and '/d/:x' and '/d/:x/:y'
+        b(x, y)     -> '/b/<x>/<y>'
+        c(x, y=5)   -> '/c/<x>' and '/c/<x>/<y>'
+        d(x=5, y=6) -> '/d' and '/d/<x>' and '/d/<x>/<y>'
     """
-    import inspect # Expensive module. Only import if necessary.
     path = '/' + func.__name__.replace('__','/').lstrip('/')
-    spec = inspect.getargspec(func)
+    spec = getargspec(func)
     argc = len(spec[0]) - len(spec[3] or [])
-    path += ('/:%s' * argc) % tuple(spec[0][:argc])
+    path += ('/<%s>' * argc) % tuple(spec[0][:argc])
     yield path
     for arg in spec[0][argc:]:
-        path += '/:%s' % arg
+        path += '/<%s>' % arg
         yield path
 
 
@@ -2760,7 +2863,7 @@ def load_app(target):
 _debug = debug
 def run(app=None, server='wsgiref', host='127.0.0.1', port=8080,
         interval=1, reloader=False, quiet=False, plugins=None,
-        debug=False, **kargs):
+        debug=None, **kargs):
     """ Start a server instance. This method blocks until the server terminates.
 
         :param app: WSGI application or target string supported by
@@ -2803,7 +2906,7 @@ def run(app=None, server='wsgiref', host='127.0.0.1', port=8080,
         return
 
     try:
-        _debug(debug)
+        if debug is not None: _debug(debug)
         app = app or default_app()
         if isinstance(app, basestring):
             app = load_app(app)
@@ -3131,16 +3234,16 @@ class StplParser(object):
     _re_tok += '|^([ \\t]*(?:if|for|while|with|try|def|class)\\b)' \
                '|^([ \\t]*(?:elif|else|except|finally)\\b)'
     # 5: Our special 'end' keyword (but only if it stands alone)
-    _re_tok += '|((?:^|;)[ \\t]*end[ \\t]*(?=(?:%(block_close)s[ \\t]*)?$|;|#))'
+    _re_tok += '|((?:^|;)[ \\t]*end[ \\t]*(?=(?:%(block_close)s[ \\t]*)?\\r?$|;|#))'
     # 6: A customizable end-of-code-block template token (only end of line)
     _re_tok += '|(%(block_close)s[ \\t]*(?=$))'
     # 7: And finally, a single newline. The 8th token is 'everything else'
-    _re_tok += '|(\\n)'
+    _re_tok += '|(\\r?\\n)'
     # Match the start tokens of code areas in a template
     _re_split = '(?m)^[ \t]*(?:(%(line_start)s)|(%(block_start)s))'
     # Match inline statements (may contain python strings)
     _re_inl = '%%(inline_start)s((?:%s|[^\'"\n]*?)+)%%(inline_end)s' % _re_inl
-    
+
     default_syntax = '<% %> % {{ }}'
 
     def __init__(self, source, syntax=None, encoding='utf8'):
@@ -3204,7 +3307,7 @@ class StplParser(object):
                 code_line += _str
             elif _com:  # Python comment (up to EOL)
                 comment = _com
-                if multiline and _com.strip().endswith(self._tokens[1]): 
+                if multiline and _com.strip().endswith(self._tokens[1]):
                     multiline = False # Allow end-of-block in comments
             elif _blk1: # Start-block keyword (if/for/while/def/try/...)
                 code_line, self.indent_mod = _blk1, -1
@@ -3232,7 +3335,7 @@ class StplParser(object):
             prefix, pos = text[pos:m.start()], m.end()
             if prefix:
                 parts.append(nl.join(map(repr, prefix.splitlines(True))))
-            if prefix.endswith('\n'): parts.append('\n  ')
+            if prefix.endswith('\n'): parts[-1] += nl
             parts.append(self.process_inline(m.group(1).strip()))
         if pos < len(text):
             prefix = text[pos:]

@@ -9,13 +9,17 @@ Created by Rui Carmo on 2006-11-12.
 Published under the MIT license.
 """
 
-import os, stat, glob, codecs, shutil
-import rfc822
+import os, sys, logging
+import stat, glob, codecs, shutil, rfc822
+from .core import Singleton
 
 BASE_TYPES={
     "txt"     : "text/plain",
     "html"    : "text/html",
     "htm"     : "text/html",
+    "md"      : "text/x-markdown",
+    "mkd"     : "text/x-markdown",
+    "mkdn"    : "text/x-markdown",
     "markdown": "text/x-markdown",
     "textile" : "text/x-textile"
 }
@@ -52,11 +56,10 @@ def parse_page(buffer, mime_type='text/plain'):
 
 
 class Store:
-    """
-    Wiki Store - abstracts file storage
-    """
+    """Wiki Store - abstracts file storage"""
+    __metaclass__ = Singleton
 
-    def __init__(self, path):
+    def __init__(self, path = None):
         """Constructor"""
         self.path    = path
         self.pages   = {}

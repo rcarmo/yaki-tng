@@ -38,5 +38,4 @@ def wiki(page):
     except:
         result = s.get_page('meta/EmptyPage')
 
-    log.debug(result)
     return result
