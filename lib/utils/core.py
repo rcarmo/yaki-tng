@@ -8,7 +8,7 @@ License: MIT (see LICENSE.md for details)
 """
 
 import os, sys, logging
-import json
+import fnmatch, json
 
 log = logging.getLogger()
 

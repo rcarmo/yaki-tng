@@ -13,10 +13,6 @@ import cStringIO as StringIO
 import yaki.Locale
 
 
-#
-# Wild Wild Web
-#
-
 def sanitize_title(title):
   return re.sub("[\W+]","-",title.lower())
 

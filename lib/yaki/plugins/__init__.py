@@ -70,6 +70,8 @@ class Registry:
                             continue
 
     def run(self, tag, tagname, pagename = None, soup = None, request=None, response=None, indexing=False):
+        """Run each plugin"""
+
         if tagname == 'plugin':
             try:
                 name = tag['name'].lower() # get the attribute
@@ -91,13 +93,3 @@ class Registry:
                 # if plugin returns False, then the tag does not need to be processed any further
                 if result == False:
                     return
-
-
-class WikiPlugin:
-    """Base class for all Wiki plugins"""
-
-    tags = ['plugin']
-
-    def run(self, serial, tag, tagname, pagename, soup, request = None, response = None, indexing = False):
-        pass
-    
