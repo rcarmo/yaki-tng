@@ -30,6 +30,10 @@
             "whoosh": {
                 "level"   : "DEBUG",
                 "handlers": ["console"]
+            },
+            "gettext": {
+                "level"   : "DEBUG",
+                "handlers": ["console"]
             }
         },
         "root": {

@@ -11,14 +11,15 @@ import os, sys, logging
 
 log = logging.getLogger()
 
-import urlparse, re, cgi
+import urlparse, re, cgi, codecs
 from bs4 import BeautifulSoup
 from gettext import gettext as _
 from pygments import highlight
 from pygments.lexers import *
 from pygments.formatters import *
-from yaki.plugins import plugin, WikiPlugin
+from yaki.plugins import plugin
 from yaki.core import Singleton
+from yaki.store import Store
 
 @plugin
 class SyntaxHighlight:
@@ -34,11 +35,12 @@ class SyntaxHighlight:
     
 
     def run(self, serial, tag, tagname, pagename, soup, request, response):
+        s = Store()
         try:
             source = tag['src']
             (schema,host,path,parameters,query,fragment) = urlparse.urlparse(source)
-            if schema == 'cid' or self.store.isAttachment(pagename,path):
-                filename = self.store.getAttachmentFilename(pagename,path)
+            if schema == 'cid' or s.is_attachment(pagename,path):
+                filename = s.get_attachment_filename(pagename,path)
                 if os.path.exists(filename):
                     buffer = codecs.open(filename,'r','utf-8').read().strip()
                 else:
