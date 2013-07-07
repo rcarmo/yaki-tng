@@ -1,5 +1,11 @@
-# Module placeholder
+#!/usr/bin/env python
+# encoding: utf-8
+"""
+Main Yaki module
 
+Created by Rui Carmo on 2013-06-10.
+Published under the MIT license.
+"""
 import os, sys, logging, gettext
 
 log = logging.getLogger()
