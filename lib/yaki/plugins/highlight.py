@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 """
-SyntaxHighlight.py
+Pygments syntax highligthing
 
 Created by Rui Carmo on 2007-01-11.
 Published under the MIT license.
@@ -17,9 +17,7 @@ from gettext import gettext as _
 from pygments import highlight
 from pygments.lexers import *
 from pygments.formatters import *
-from yaki.plugins import plugin
-from yaki.core import Singleton
-from yaki.store import Store
+from yaki import Singleton, Store, plugin
 
 @plugin
 class SyntaxHighlight:
@@ -31,6 +29,7 @@ class SyntaxHighlight:
 
 
     def __init__(self):
+        log.debug(self)
         pass
     
 
@@ -62,7 +61,6 @@ class SyntaxHighlight:
         lexer = get_lexer_by_name(lexer)
         formatter = HtmlFormatter(linenos=False, cssclass='syntax')
         result = highlight(buffer, lexer, formatter)
-        log.debug(result)
         tag.replace_with(BeautifulSoup(result.strip()))
 
         return False # no other plugin should process this tag

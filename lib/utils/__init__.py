@@ -12,4 +12,5 @@ import os, sys, logging
 log = logging.getLogger()
 
 # export submodule symbols
-from core import Struct, get_config, path_for, locate
+from .core import Struct, get_config, path_for, locate
+from .timekit import time_since

@@ -7,12 +7,14 @@ Created by Rui Carmo on 2006-09-10.
 Published under the MIT license.
 """
 
+import logging
+
+log = logging.getLogger()
+
 class Singleton(type):
-    """Implement the Singleton pattern - it might be seen as evil, but it's handy."""
+    _instances = {}
 
     def __call__(cls, *args, **kwargs):
-        try:
-            return cls.__instance
-        except AttributeError:
-            cls.__instance = super(Singleton, cls).__call__(*args, **kwargs)
-            return cls.__instance
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]

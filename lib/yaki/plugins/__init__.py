@@ -13,12 +13,13 @@ log = logging.getLogger()
 
 from config import settings
 from yaki.core import Singleton
+from utils.core import tb
 
 
 def plugin(cls):
     """Class decorator for adding plugins to the registry"""
     
-    Registry().register(cls())
+    Registry.register(cls())
     return cls
 
 
@@ -30,22 +31,23 @@ class Registry:
     serial     = 0
     
     def __init__(self):
+        log.debug(self)
         path = os.path.dirname(__file__)
         for f in os.listdir(path):
             if fnmatch.fnmatch(f, "*.py") and (f[0] != '_'):
                 (modname,ext) = os.path.basename(f).rsplit('.', 1)
-                log.debug("module: %s" % modname)
                 try:
                     importlib.import_module('.' + modname,'yaki.plugins')
                 except ImportError as e:
-                    log.error(e)
+                    log.error(tb())
                     pass
 
 
     def __iter__(self):
         return iter(self.plugins)
 
-        
+
+    @classmethod
     def register(self, cls):
         if cls not in self.registered:
             self.registered.append(cls)
@@ -53,9 +55,10 @@ class Registry:
             if tag not in self.plugins[cls.category].keys():
                 self.plugins[cls.category][tag] = []
             self.plugins[cls.category][tag].append(cls)
-        log.debug("Plugin %s registered in category %s for tags %s" % (cls.__class__,cls.category,cls.tags))
+        log.debug("%s registered in '%s' for %s" % (cls.__class__,cls.category,cls.tags))
     
 
+    @classmethod
     def apply_all(self, pagename, soup, request=None, response=None, indexing=False):
         """Runs all markup plugins that process specific tags"""
         for tagname in self.plugins['markup'].keys():
@@ -69,6 +72,8 @@ class Registry:
                         if result == True:
                             continue
 
+
+    @classmethod
     def run(self, tag, tagname, pagename = None, soup = None, request=None, response=None, indexing=False):
         """Run each plugin"""
 
