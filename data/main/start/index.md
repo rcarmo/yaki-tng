@@ -6,6 +6,9 @@ X-Cache-Control: max-age=600
 X-Template: home.y
 Content-Type: text/x-markdown
 
+* [Documentation](docs)
+* [Tests](tests)
+
 <plugin name="journal" size="1" src="^blog\/.+"/>                              
                                                                                
 <div class="holder">                                                           

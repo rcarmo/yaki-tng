@@ -20,6 +20,7 @@ from decorators import timed
 
 
 @route('/')
+@route('/space')
 def root():
     log.debug(settings)
     redirect(settings.content.homepage)
