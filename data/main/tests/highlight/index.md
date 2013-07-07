@@ -12,6 +12,10 @@ def bar()
     pass
 </pre>
 
-## From file
+## From existing file
 
 <pre syntax="javascript" src="test.txt"></pre>
+
+## From missing file
+
+<pre syntax="javascript" src="no_file.txt"></pre>
