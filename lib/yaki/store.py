@@ -221,6 +221,8 @@ class Store:
     
 
     def add_attachment(self, pagename, filename, newbasename = None):
+        """Add attachment to a page"""
+
         targetpath = self.getPath(pagename)
         if(not os.path.exists(targetpath)):
             os.makedirs(targetpath)
