@@ -11,12 +11,11 @@ import os, sys, logging
 
 log = logging.getLogger()
 
-import urlparse, re
+import urlparse, re, time
 from bs4 import BeautifulSoup
-from yaki import Index, Store, Singleton, plugin
+from yaki import Index, Store, Singleton, plugin, render_markup
 from utils import time_since
-
-
+import HTMLParser
 
 @plugin
 class InterWiki:
@@ -44,14 +43,15 @@ class InterWiki:
             return
 
         # prepare to parse only <pre> tags (so that we can have multiple maps organized by sections)
-        plaintext = SoupStrainer('pre')
-        map = ''.join([text.string for text in BeautifulSoup(page.render(), parseOnlyThese=plaintext)])
+        soup = BeautifulSoup(render_markup(page['data'],page['content-type']))
+        h = HTMLParser.HTMLParser()
+
+        all_sections = u''.join(map(lambda t: str(t.string), soup.find_all('pre'))).strip()
         # now that we have the full map, let's build the schema hash
-        lines = map.split('\n')
-        for line in lines:
+        for line in all_sections.split('\n'):
             try:
                 (schema, url) = line.strip().split(' ',1)
-                self.schemas[schema.lower()] = url.replace("&amp;","&")
+                self.schemas[schema.lower()] = h.unescape(url) #url.replace("&amp;","&")
             except ValueError:
                 log.warn("skipping line '%s'" % line)
                 pass
@@ -60,24 +60,21 @@ class InterWiki:
 
     def run(self, serial, tag, tagname, pagename, soup, request, response):
         s = Store()
+        if (self.mtime < s.mtime(self.wiki_map)):
+            self.load()
+
         try:
-            if (self.mtime < s.mtime(self.wiki_map)):
-                self.load()
-        except:
-            return True
-        try:
-            url = tag['href']
+            uri = tag['href']
         except KeyError:
             return True
         try:      
-            (schema, link) = url.split(':',1)
+            (schema, link) = uri.split(':',1)
         except ValueError:
             return False
 
-        log.debug("%s", (schema, link))
-        tag['rel'] = url
-        # Remove base prefix in case it was added by BaseURI plugin earlier
-        schema = schema.replace(self.ac.base,'').lower()
+        schema = schema.lower()
+        tag['rel'] = uri
+
         if schema in self.schemas.keys():
             if '%s' in self.schemas[schema]:
                 try:
