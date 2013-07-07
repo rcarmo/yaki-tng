@@ -57,10 +57,12 @@ def parse_page(buffer, mime_type='text/plain'):
 
 class Store:
     """Wiki Store - abstracts file storage"""
+
     __metaclass__ = Singleton
 
     def __init__(self, path = None):
         """Constructor"""
+
         self.path    = path
         self.pages   = {}
         self.aliases = {}
@@ -69,13 +71,13 @@ class Store:
 
     def get_path(self,pagename):
         """Append the store path to the pagename"""
+
         return os.path.join(self.path, pagename)
     
 
     def date(self, pagename):
-        """
-        Retrieve a page's stored date (or fall back to mtime)
-        """
+        """Retrieve a page's stored date (or fall back to mtime)"""
+
         if pagename in self.dates.keys():
             return self.dates[pagename]
         else:
@@ -89,10 +91,9 @@ class Store:
 
 
     def mtime(self, pagename):
-        """
-        Retrieve modification time for the current revision of a given page by checking the folder modification time.
-        Assumes underlying OS/FS knows how to properly update mtime on a folder.
-        """
+        """Retrieve modification time for the current revision of a given page by checking the folder modification time.
+        Assumes underlying OS/FS knows how to properly update mtime on a folder."""
+
         targetpath = self.get_path(pagename)
         if(os.path.exists(targetpath)):
             return os.stat(targetpath)[stat.ST_MTIME]
@@ -100,6 +101,8 @@ class Store:
 
     
     def get_attachments(self, pagename, pattern = '*'):
+        """Get attachments for a given page"""
+
         targetpath = self.get_path(pagename)
         attachments = glob.glob(os.path.join(targetpath,pattern))
         attachments = map(os.path.basename,filter(lambda x: not os.path.isdir(x), attachments))
@@ -107,9 +110,8 @@ class Store:
 
                 
     def is_attachment(self, pagename, attachment):
-        """
-        Checks if a given filename is actually attached to a page
-        """
+        """Checks if a given filename is attached to a page"""
+
         targetpath = self.get_path(pagename)
         attachment = os.path.join(targetpath,attachment)
         try:
@@ -121,21 +123,16 @@ class Store:
 
 
     def get_attachment_filename(self, pagename, attachment):
-        """
-        Returns the filename for an attachment
-        """
+        """Returns the filename for an attachment"""
+
         targetpath = self.get_path(pagename)
         targetfile = os.path.join(targetpath,attachment)
         return targetfile
 
     
     def get_page(self, pagename, revision = None):
-        """
-        Retrieve the specified revision from the store.
-        
-        At this point we ignore the revision argument
-        (versioning will be added at a later date, if ever)
-        """
+        """Retrieve the specified page"""
+
         targetpath = self.get_path(pagename)
         mtime = self.mtime(pagename)
         if mtime != None:
@@ -181,9 +178,8 @@ class Store:
     
 
     def get_all_pages(self):
-        """
-        Enumerate all pages and their last modification time
-        """
+        """Enumerate all pages and their last modification time"""
+
         for folder, subfolders, files in os.walk(self.path):
             # Skip common SCM subfolders
             # TODO: move this to a regexp-based ignore list
@@ -211,9 +207,8 @@ class Store:
     
 
     def update_page(self, pagename, fields, base = "index.txt"):
-        """
-        Updates a given page, inserting a neutral text file by default
-        """
+        """Updates a given page, inserting a neutral text file by default"""
+
         targetpath = self.getPath(pagename)
         if(not os.path.exists(targetpath)):
             os.makedirs(targetpath)
@@ -233,16 +228,3 @@ class Store:
             shutil.move(filename,os.path.join(targetpath,newbasename))
         else:
             shutil.move(filename,os.path.join(targetpath,os.path.basename(filename)))
-
-#=================================
-
-if __name__=="__main__":
-    print "Initializing test store."
-    s = Store('../space')
-    print s.allPages()
-    print "Getting test page."
-    r = s.getRevision('SandBox')
-    if None != r:
-        print r.raw
-    else:
-        print "Empty page."
