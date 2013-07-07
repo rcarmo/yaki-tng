@@ -17,7 +17,7 @@ from yaki import Index, Store, Singleton, plugin
 from utils import time_since
 
 @plugin
-class RebaseURIs:
+class BaseURI:
     __metaclass__ = Singleton
 
     category = 'markup'
