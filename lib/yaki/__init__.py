@@ -14,5 +14,6 @@ from .mocks import Index
 
 # Initialize localizations
 
-gettext.bindtextdomain('yaki', os.path.join(os.path.dirname(__file__), 'locale'))
-gettext.textdomain('yaki')
+english = gettext.translation('yaki', os.path.join(os.path.dirname(__file__), 'locale'), languages=['en'])
+english.install()
+log.debug(_('Localizations Installed'))

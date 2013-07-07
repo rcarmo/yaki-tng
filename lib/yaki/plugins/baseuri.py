@@ -11,9 +11,8 @@ import os, sys, logging
 
 log = logging.getLogger()
 
-import urlparse, re
+import urlparse, re, posixpath
 from bs4 import BeautifulSoup
-from gettext import gettext as _
 from yaki import Index, Store, Singleton, plugin
 from utils import time_since
 
@@ -43,8 +42,8 @@ class RebaseURIs:
         'attach' :{'title': u'link to attached file %(uri)s', 'class': u'linkedfile'}
     }
 
-    base  = '/space'
-    media = '/media'
+    base  = '/space/'
+    media = '/media/'
     
     def __init__(self):
         log.debug(self)
@@ -57,6 +56,10 @@ class RebaseURIs:
             uri = tag['href']
         except KeyError:
             return True
+
+        # Try to handle relative URIs
+        if uri[0] == '.':
+            uri = posixpath.normpath(os.path.join(pagename, uri))
         
         # Try to handle the uri as a schema/path pair
         (schema,netloc,path,parameters,query,fragment) = urlparse.urlparse(uri)
@@ -67,6 +70,7 @@ class RebaseURIs:
                 path = tag['href'] = uri
             if uri in i.all_pages:
                 known = True
+
         
         if(schema == ''):
             if s.is_attachment(pagename, path):
@@ -85,7 +89,7 @@ class RebaseURIs:
                         tag['title'] = self.schemas[schema]['title'] % {'uri':uri}
                         tag['class'] = self.schemas[schema]['class']
                         return False
-                tag['href'] = self.base + tag['href']
+                tag['href'] = self.base + uri
                 tag['class'] = "wiki"
                 try: # to use indexed metadata to annotate links
                     last = i.page_info[path]['last-modified']
@@ -109,9 +113,11 @@ class RebaseURIs:
                     exists = tag['class']
                     return True #we're done here, but this tag may need handling elsewhere
                 except:
-                    tag['href'] = self.base + tag['href']
+                    log.debug(_('link_undefined_format'))
+                    tag['href'] = self.base + uri
                     tag['class'] = "wikiunknown"
                     tag['title'] = _('link_undefined_format') % path
+
         elif(schema in self.schemas.keys()): # this is an external link, so reformat it
             tag['title'] = self.schemas[schema]['title'] % {'uri':uri}
             tag['class'] = self.schemas[schema]['class']

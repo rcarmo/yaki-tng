@@ -62,7 +62,6 @@ class Registry:
     def apply_all(self, pagename, soup, request=None, response=None, indexing=False):
         """Runs all markup plugins that process specific tags"""
         for tagname in self.plugins['markup'].keys():
-            log.debug(tagname)
             if tagname != 'plugin':
                 applicable = self.plugins['markup'][tagname]
                 for plugin in applicable:

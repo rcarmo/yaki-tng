@@ -38,7 +38,7 @@ msgstr "Created on %s by %s"
 
 # Message Formatting
 msgid "warning_message_format"
-msgstr "<div class="warning">%s</div>"
+msgstr "<div class=\"warning\">%s</div>"
 
 # Plugins
 msgid "index_prefix_regex"
@@ -120,7 +120,7 @@ msgid "title_search_results"
 msgstr "Page titles similar to"
 
 msgid "search_instructions"
-msgstr "You can use arbitrarily nested Boolean expressions with AND, OR, NOT, etc. "quoted sentences" for exact matches, search inside a field like title: or tags: or even do combined field and wildcard notation such as date:201103* "
+msgstr "You can use arbitrarily nested Boolean expressions with AND, OR, NOT, etc. \"quoted sentences\" for exact matches, search inside a field like title: or tags: or even do combined field and wildcard notation such as date:201103* "
 
 msgid "quicklook_click_to_zoom"
 msgstr "Click on the image to zoom in"
@@ -132,7 +132,7 @@ msgid "error_markup_type"
 msgstr "Cannot process markup"
 
 msgid "error_reference_format"
-msgstr "Markup error: "cid:" schema missing from file reference"
+msgstr "Markup error: \"cid:\" schema missing from file reference"
 
 msgid "error_plugin_attr"
 msgstr "Plugin error: supplied attributes not in correct format"
