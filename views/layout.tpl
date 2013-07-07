@@ -9,6 +9,7 @@
         <title>{{title}}</title>
         <link rel="stylesheet" href="/static/css/ink.css">
         <link rel="stylesheet" href="/static/css/syntax.css">
+        <link rel="stylesheet" href="/static/css/layout.css">
         <link rel="stylesheet" href="/static/css/debug.css">
 
         <!--[if IE 7 ]>
@@ -23,28 +24,30 @@
 %end
     </head>
     <body>
-        <div id="topbar" style="background: black;">
+        <div id="topbar">
             <!-- Desktop navigation -->
             <nav class="ink-navigation ink-grid hide-small hide-medium">
-                <ul class="menu horizontal black">
+                <ul class="menu horizontal flat green">
                     <li class="title"><a href="/">Yaki</a></li>
                 </ul>
             </nav>
             <!-- Mobile navigation -->
             <nav class="ink-navigation ink-grid hide-all show-medium show-small">
-                <ul class="menu vertical flat black">
-                    <li class="title"><a href="/">Yaki</a>
-                        <button class="toggle" data-target="#topbar_menu">
+                <ul class="menu vertical flat green">
+                    <li class="title"><a href="/space">Yaki</a>
+                        <button class="toggle push-right" data-target="#topbar_menu" id="menu-toggle">
                             <span class="icon-reorder"></span>
                         </button>
                     </li>
 
                 </ul>
-                <ul class="menu vertical flat black hide-all" id="topbar_menu">
+                <ul class="menu vertical flat green hide-all" id="topbar_menu">
                    <li>
                    </li>
                 </ul>
             </nav>
+            <div class="border">
+            </div>
         </div>
         </div>
         <!-- TODO: masthead -->
