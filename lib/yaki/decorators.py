@@ -6,8 +6,7 @@ import functools
 from bottle import request, response
 from bs4 import BeautifulSoup
 
-from .utils import render_markup
-from .plugins import Registry
+from yaki import render_markup, Registry
 
 plugins = Registry()
 
