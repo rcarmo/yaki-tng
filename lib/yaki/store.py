@@ -82,6 +82,12 @@ class Store:
             return self.mtime(pagename)
 
 
+    def exists(self, pagename):
+        """Verifies if a given page/path exists"""
+        targetpath = self.get_path(pagename)
+        return(os.path.exists(targetpath))
+
+
     def mtime(self, pagename):
         """
         Retrieve modification time for the current revision of a given page by checking the folder modification time.

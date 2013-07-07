@@ -66,6 +66,7 @@ class Registry:
                 applicable = self.plugins['markup'][tagname]
                 for plugin in applicable:
                     for tag in soup.find_all(tagname):
+                        log.debug(">%s", (tag, plugin))
                         result = plugin.run(self.serial, tag, tagname, pagename, soup, request, response)
                         self.serial = self.serial + 1
                         if result == True:

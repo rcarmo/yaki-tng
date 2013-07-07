@@ -17,24 +17,33 @@ from yaki import Index, Store, Singleton, plugin
 from utils import time_since
 
 
-metaPage = 'meta/InterWikiMap'
+
+@plugin
+class InterWiki:
+    __metaclass__ = Singleton
 
 
-class InterWikiPlugin(yaki.Plugins.WikiPlugin):
-    def __init__(self, registry, webapp):
-        registry.register('markup',self, 'a','interwiki')
-        self.ac = webapp.getContext()
-        self.load()
-        
+    category = 'markup'
+    tags     = ['a']
+    wiki_map = 'meta/InterWikiMap'
+    schemas  = {}
+    mtime    = 0
+
+
+    def __init__(self):
+        log.debug(self)
+
+
     def load(self):
         # load InterWikiMap
+        s = Store()
         try:
-            page = self.ac.store.getRevision(metaPage)
+            page = s.get_page(self.wiki_map)
         except:
-            print "WARNING: no %s definitions" % metaPage
+            log.warn("InterWikiMap: no %s definitions" % self.wiki_map)
             return
-        self.ac.interwikischemas = {}
-        # prepare to parse only <pre> tags in it (so that we can have multiple maps organized by sections)
+
+        # prepare to parse only <pre> tags (so that we can have multiple maps organized by sections)
         plaintext = SoupStrainer('pre')
         map = ''.join([text.string for text in BeautifulSoup(page.render(), parseOnlyThese=plaintext)])
         # now that we have the full map, let's build the schema hash
@@ -42,16 +51,17 @@ class InterWikiPlugin(yaki.Plugins.WikiPlugin):
         for line in lines:
             try:
                 (schema, url) = line.strip().split(' ',1)
-                self.ac.interwikischemas[schema.lower()] = url.replace("&amp;","&")
-            except ValueError: # skip lines with more than two fields
-                #print "WARNING: skipping line '%s'" % line
+                self.schemas[schema.lower()] = url.replace("&amp;","&")
+            except ValueError:
+                log.warn("skipping line '%s'" % line)
                 pass
-        #print "INFO: map is ", self.schemas
         self.mtime = time.time()
     
+
     def run(self, serial, tag, tagname, pagename, soup, request, response):
+        s = Store()
         try:
-            if (self.mtime < self.ac.store.mtime(metaPage)):
+            if (self.mtime < s.mtime(self.wiki_map)):
                 self.load()
         except:
             return True
@@ -63,18 +73,20 @@ class InterWikiPlugin(yaki.Plugins.WikiPlugin):
             (schema, link) = url.split(':',1)
         except ValueError:
             return False
+
+        log.debug("%s", (schema, link))
         tag['rel'] = url
         # Remove base prefix in case it was added by BaseURI plugin earlier
         schema = schema.replace(self.ac.base,'').lower()
-        if schema in self.ac.interwikischemas.keys():
-            if '%s' in self.ac.interwikischemas[schema]:
+        if schema in self.schemas.keys():
+            if '%s' in self.schemas[schema]:
                 try:
-                    uri = self.ac.interwikischemas[schema] % link
+                    uri = self.schemas[schema] % link
                 except:
                     print "Error in processing Interwiki link (%s,%s,%s)" % (schema, link, self.schemas[schema])
-                    uri = self.ac.interwikischemas[schema] + link
+                    uri = self.schemas[schema] + link
             else:
-                uri = self.ac.interwikischemas[schema] + link
+                uri = self.schemas[schema] + link
             tag['href'] = uri
             (schema,netloc,path,parameters,query,fragment) = urlparse.urlparse(uri)
             tag['title'] = "link to %s on %s" % (link, netloc)

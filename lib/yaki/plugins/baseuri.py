@@ -23,7 +23,7 @@ class RebaseURIs:
     category = 'markup'
     tags     = ['a']
 
-    uri_schemas = {
+    schemas = {
         '*'      :{'title': u'unknown protocol linking to %(uri)s','class': u'generic'},
         'http'   :{'title': u'external link to %(uri)s','class': u'http'},
         'https'  :{'title': u'secure link to %(uri)s','class': u'https'},
@@ -62,13 +62,21 @@ class RebaseURIs:
             uri = posixpath.normpath(os.path.join(pagename, uri))
         
         # Try to handle the uri as a schema/path pair
-        (schema,netloc,path,parameters,query,fragment) = urlparse.urlparse(uri)
+        schema = ''
+        path = uri
+        try:
+            schema, path = uri.split(':',1)
+        except:
+            pass
         known = False
+
         if schema == '':
             uri = i.resolve_alias(path)
+
             if uri != path:
                 path = tag['href'] = uri
-            if uri in i.all_pages:
+
+            if s.exists(uri) or uri in i.all_pages:
                 known = True
 
         
@@ -96,9 +104,9 @@ class RebaseURIs:
                     tag['title'] = _('link_update_format') % (path,time_since(last))
                 except:
                     tag['title'] = _('link_defined_notindexed_format') % path
-            elif((schema == netloc == path == parameters == query == '') and (fragment != '')):
+            elif('#' in uri):
                 # this is an anchor, leave it alone
-                tag['href'] = self.ac.base + pagename + "#" + fragment
+                tag['href'] = self.base + uri
                 tag['class'] = "anchor"
                 try:
                     exists = tag['title']
@@ -113,7 +121,6 @@ class RebaseURIs:
                     exists = tag['class']
                     return True #we're done here, but this tag may need handling elsewhere
                 except:
-                    log.debug(_('link_undefined_format'))
                     tag['href'] = self.base + uri
                     tag['class'] = "wikiunknown"
                     tag['title'] = _('link_undefined_format') % path
@@ -125,7 +132,7 @@ class RebaseURIs:
         else: # assume this is an interwiki link (i.e., it seems to have a custom schema)
             tag['title'] =  _('link_interwiki_format') % uri
             tag['class'] = "interwiki"
-            #tag['target'] = '_blank'
+            tag['target'] = '_blank'
             # Signal that this tag needs further processing
             return True
         # We're done
