@@ -10,7 +10,7 @@ Published under the MIT license.
 import math, time, datetime, calendar, unittest
 import os, sys, re, binascii, fnmatch, xmlrpclib, cgi, htmlentitydefs, struct
 import cStringIO as StringIO
-import locale
+import yaki.Locale
 
 
 def sanitize_title(title):
