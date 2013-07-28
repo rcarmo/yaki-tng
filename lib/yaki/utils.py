@@ -63,14 +63,14 @@ def render_markup(raw, markup=u'text/html'):
         return raw
     
     return {
-        u'text/plain': _plaintext,
+        u'text/plain'         : _plaintext,
         u'text/x-web-markdown': _markdown,
-        u'text/x-markdown': _markdown,
-        u'text/markdown': _markdown,
-        u'text/textile': _textile,
-        u'text/x-textile': _textile,
-        u'text/html': _html}[markup](raw)
-    
+        u'text/x-markdown'    : _markdown,
+        u'text/markdown'      : _markdown,
+        u'text/textile'       : _textile,
+        u'text/x-textile'     : _textile,
+        u'text/html'          : _html}[markup](raw)
+        
 
 def getImageInfo(data):
     data = str(data)
