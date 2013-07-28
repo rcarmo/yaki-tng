@@ -16,17 +16,6 @@ def sanitize_title(title):
   return re.sub("[\W+]","-",title.lower())
 
 
-def do_pings(siteinfo):
-  try:
-    for target in siteinfo['ping']:
-      if target == 'technorati':
-        print "Pinging Technorati..."
-        server = xmlrpclib.Server('http://rpc.technorati.com/rpc/ping')
-        print server.weblogUpdates.ping(siteinfo['sitetitle'], siteinfo['ping'][target])
-  except:
-    pass
-
-
 def makeUnique(seq, transform=None):  
   # order preserving 
   if transform is None: 
