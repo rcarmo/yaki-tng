@@ -12,9 +12,8 @@ import os, sys, logging, gettext
 log = logging.getLogger()
 
 from .store import Store
-from .core import Singleton
 from .plugins import plugin, Registry
-from .utils import render_markup
+from .core import render_markup
 
 # TODO: implement these
 

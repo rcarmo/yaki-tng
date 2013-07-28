@@ -12,6 +12,18 @@ import fnmatch, json
 
 log = logging.getLogger()
 
+
+class Singleton(type):
+    """An implemetation of the Singleton pattern (use as metaclass)"""
+
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
 class Struct(dict):
     """An object that recursively builds itself from a dict and allows easy access to attributes"""
 

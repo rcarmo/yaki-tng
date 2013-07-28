@@ -12,12 +12,13 @@ import os, sys, logging
 log = logging.getLogger()
 
 import urlparse, re, cgi, codecs
+from yaki import Store, plugin
+from utils.core import Singleton
 from bs4 import BeautifulSoup
 from gettext import gettext as _
 from pygments import highlight
 from pygments.lexers import *
 from pygments.formatters import *
-from yaki import Singleton, Store, plugin
 
 @plugin
 class SyntaxHighlight:

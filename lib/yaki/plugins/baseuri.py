@@ -13,8 +13,9 @@ log = logging.getLogger()
 
 import urlparse, re, posixpath
 from bs4 import BeautifulSoup
-from yaki import Index, Store, Singleton, plugin
-from utils import time_since
+from yaki import Index, Store, plugin
+from utils.core import Singleton
+from utils.timekit import time_since
 
 @plugin
 class BaseURI:

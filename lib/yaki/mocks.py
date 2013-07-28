@@ -1,6 +1,6 @@
 # Temporary classes 
 
-from yaki.core import Singleton
+from utils.core import Singleton
 
 class Index:
     __metaclass__ = Singleton

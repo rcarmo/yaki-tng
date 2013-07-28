@@ -11,7 +11,7 @@ import os, sys, logging
 
 log = logging.getLogger()
 
-# export submodule symbols
-from .core import Struct, get_config
+# export commonly-used submodule symbols
+from .core import Struct, Singleton, get_config, tb
 from .filekit import path_for, locate
 from .timekit import time_since

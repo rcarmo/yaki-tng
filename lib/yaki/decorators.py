@@ -21,7 +21,7 @@ def render():
             page['data'] = BeautifulSoup(render_markup(page['data'],page['content-type']))
             plugins.apply_all(kwargs['page'], page['data'], request=request, response=response, indexing=False)
 
-            # TODO: normalize links, run plugins, etc.
+            # TODO: normalize links, run specific plugins, etc.
             
             return page
         return wrapper

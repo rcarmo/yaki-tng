@@ -13,8 +13,9 @@ log = logging.getLogger()
 
 import urlparse, re, time
 from bs4 import BeautifulSoup
-from yaki import Index, Store, Singleton, plugin, render_markup
-from utils import time_since
+from yaki import Index, Store, plugin, render_markup
+from utils.core import Singleton
+from utils.timekit import time_since
 import HTMLParser
 
 @plugin

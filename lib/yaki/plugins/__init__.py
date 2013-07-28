@@ -12,8 +12,7 @@ import os, sys, re, logging, fnmatch, importlib
 log = logging.getLogger()
 
 from config import settings
-from yaki.core import Singleton
-from utils.core import tb
+from utils.core import Singleton, tb
 
 
 def plugin(cls):
