@@ -39,7 +39,6 @@
                             <span class="icon-reorder"></span>
                         </button>
                     </li>
-
                 </ul>
                 <ul class="menu vertical flat green hide-all" id="topbar_menu">
                    <li>

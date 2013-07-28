@@ -11,7 +11,7 @@ Published under the MIT license.
 
 import os, sys, logging
 import stat, glob, codecs, shutil, rfc822
-from utils import Singleton
+from utils.core import Singleton
 
 BASE_TYPES={
     "txt"     : "text/plain",
