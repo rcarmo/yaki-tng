@@ -6,7 +6,7 @@ Title: Inter-Wiki Map
 Tags: meta
 Content-Type: text/x-textile
 
-h1. iTunes
+h2. iTunes
 
 <pre>
 Artist http://itunes.com/
@@ -16,7 +16,7 @@ ITMSMovie http://itunes.com/movie/
 ITMSTV http://itunes.com/tv/
 </pre>
 
-h1. Other Wikis
+h2. Other Wikis
 
 <pre>
 E2 http://www.everything2.net/e2node/
@@ -29,7 +29,7 @@ Ubuntu https://wiki.ubuntu.com/
 Lspace http://wiki.lspace.org/wiki/
 </pre>
 
-h1. Telco References
+h2. Telco References
 
 <pre>
 3GPP http://the.taoofmac.com/3gpp_redirect.php?spec=
@@ -38,7 +38,7 @@ RFC http://www.faqs.org/rfcs/rfc
 VoIP http://www.voip-info.org/tiki-index.php?page=
 </pre>
 
-h1. Generic References
+h2. Generic References
 
 <pre>
 Acronym http://www.acronymfinder.com/af-query.asp?String=exact&Acronym=
@@ -63,7 +63,7 @@ YouTube http://www.youtube.com/watch?v=
 KB http://support.apple.com/kb/
 </pre>
 
-h1. Web Services
+h2. Web Services
 
 <pre>
 Geo http://maps.google.com/maps?t=k&q=
@@ -73,7 +73,7 @@ GoogleFinance http://finance.google.com/finance?q=
 Technorati http://www.technorati.com/search/
 </pre>
 
-h1. Coding
+h2. Coding
 
 <pre>
 CPAN http://search.cpan.org/search?query=

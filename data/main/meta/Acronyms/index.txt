@@ -5,7 +5,7 @@ Last-Modified: 2007-06-03 11:53:28
 Tags: meta
 Content-Type: text/x-textile
 
-h1. Generic Acronyms
+h2. Generic Acronyms
 
 <pre>
 BLT Bacon, Lettuce and Tomato
@@ -17,7 +17,7 @@ IMHO In My Honest Opinion
 FUD Fear, Uncertainty and Doubt
 </pre>
 
-h1. Computing Acronyms
+h2. Computing Acronyms
 
 <pre>
 CLI Command-Line Interface
@@ -33,7 +33,7 @@ WYSIWYG What You See Is What You Get
 XML Extensible Markup Language
 </pre>
 
-h1. Networking Acronyms
+h2. Networking Acronyms
 
 <pre>
 FTP File Transfer Protocol
@@ -48,7 +48,7 @@ UDP User Datagram Protocol
 URL Uniform Resource Locator
 </pre>
 
-h1. Mobile Acronyms
+h2. Mobile Acronyms
 
 <pre>
 GSM Global System for Mobile communications

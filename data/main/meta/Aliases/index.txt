@@ -11,7 +11,7 @@ This page holds direct replacements for some shorthand I use in WikiLinks that o
 
 Some are merely temporary until I can make references to some topics completely consistent across old content and clean them up.
 
-h1. Sites and Companies
+h2. Sites and Companies
 
 <pre>
 Adobe com/Adobe
@@ -83,14 +83,14 @@ com/Yahoo/Pipes http://pipes.yahoo.com
 com/Wacom http://www.wacom.com
 </pre>
 
-h1. Internal
+h2. Internal
 
 <pre>
 SiteDesigns site/Designs
 SiteHeaders site/Headers
 </pre>
 
-h1. Apple Stuff
+h2. Apple Stuff
 
 <pre>
 .Mac MobileMe
@@ -137,7 +137,7 @@ iPod/mini com/Apple/iPod/mini
 iPod/nano com/Apple/iPod/nano
 </pre>
 
-h1. Devices
+h2. Devices
 
 <pre>
 PC hw/PC
@@ -161,7 +161,7 @@ PlayStation_3 com/Sony/PlayStation/3
 Sony/Reader com/Sony/Reader
 </pre>
 
-h1. Microsoft 
+h2. Microsoft 
 
 <pre>
 Exchange com/Microsoft/Exchange
@@ -177,7 +177,7 @@ Windows/XP com/Microsoft/Windows/XP
 Windows/7 com/Microsoft/Windows/7
 </pre>
 
-h1. Languages & Development
+h2. Languages & Development
 
 <pre>
 AppleScript dev/AppleScript
@@ -193,7 +193,7 @@ Textile markup/Textile
 Markdown markup/Markdown
 </pre>
 
-h1. Linux
+h2. Linux
 
 <pre>
 Debian os/Linux/Distributions/Debian
@@ -210,7 +210,7 @@ SuSE os/Linux/Distributions/SuSe
 Ubuntu os/Linux/Distributions/Ubuntu
 </pre>
 
-h1. Acronyms and Buzzwords
+h2. Acronyms and Buzzwords
 
 <pre>
 IEEE/802.1X Wikipedia:802.1X
@@ -323,7 +323,7 @@ vCalendar Wikipedia:ICalendar
 vCard Wikipedia:VCard
 </pre>
 
-h1. People
+h2. People
 
 <pre>
 Leo_Laporte people/Leo_Laporte
@@ -369,7 +369,7 @@ people/Tim_Cook Wikipedia:Tim_Cook
 people/Tom_Hume http://www.tomhume.org/
 </pre>
 
-h1. Apps and Tools
+h2. Apps and Tools
 
 <pre>
 Acrobat Wikipedia:Adobe_Acrobat
@@ -396,7 +396,7 @@ Xen Wikipedia:Xen
 Whoosh https://bitbucket.org/mchaput/whoosh/
 </pre>
 
-h1. Concepts
+h2. Concepts
 
 <pre>
 Artificial_Intelligence AI
@@ -415,7 +415,7 @@ Web_Design design/web
 Zen Wikipedia:Zen
 </pre>
 
-h1. Entertainment
+h2. Entertainment
 
 <pre>
 TV/Stargate_Universe Wikipedia:Stargate_Universe
