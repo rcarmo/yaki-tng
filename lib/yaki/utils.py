@@ -16,20 +16,6 @@ def sanitize_title(title):
   return re.sub("[\W+]","-",title.lower())
 
 
-def makeUnique(seq, transform=None):  
-  # order preserving 
-  if transform is None: 
-    def transform(x): return x 
-  seen = {} 
-  result = [] 
-  for item in seq: 
-    marker = transform(item) 
-    if marker not in seen:
-      seen[marker] = 1
-      result.append(item)
-  return result
-  
-
 def render_markup(raw, markup=u'text/html'):
     # Allow module to load regardless of textile or markdown support
     try:
