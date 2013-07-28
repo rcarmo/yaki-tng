@@ -51,7 +51,7 @@ def render_markup(raw, markup=u'text/html'):
         pass
 
     def _markdown(raw):
-        return markdown.Markdown(extensions=['extra','toc','smartypants'], safe_mode=False).convert(raw)
+        return markdown.Markdown(extensions=['extra','toc','smartypants','codehilite','meta','sane_lists'], safe_mode=False).convert(raw)
 
     def _plaintext(raw):
         return u'<pre>\n%s</pre>' % raw
