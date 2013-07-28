@@ -30,6 +30,7 @@ Google com/Google
 Google/Buzz com/Google/Buzz
 Google/Checkout http://checkout.google.com
 Google/Chrome com/Google/Chrome
+Chrome Google/Chrome
 Google/Code http://code.google.com
 Google/Reader com/Google/Reader
 IKEA http://www.ikea.com

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 """
-Tag acronyms with `title` attributes
+Replace aliases in links
 
 Created by Rui Carmo on 2007-01-11.
 Published under the MIT license.
@@ -12,63 +12,73 @@ import os, sys, logging
 log = logging.getLogger()
 
 import urlparse, re, time
-from bs4 import BeautifulSoup, SoupStrainer
-from yaki import Store, plugin, render_markup
+from bs4 import BeautifulSoup
+from yaki import Index, Store, plugin, render_markup
 from utils.core import Singleton
-
-meta_page = 'meta/Acronyms'
-
+from utils.timekit import time_since
+import HTMLParser
 
 @plugin
-class Acronyms:
+class Aliases:
     __metaclass__ = Singleton
 
     category  = 'markup'
-    tags      = ['span','caps']
-    meta_page = 'meta/Acronyms'
+    tags      = ['a']
+    meta_page = 'meta/Aliases'
+    aliases   = {}
     mtime     = 0
-    acronyms  = {}
+
 
     def __init__(self):
         log.debug(self)
 
 
     def load(self):
-        # Load acronym map
+        # load Aliases
         s = Store()
         try:
             page = s.get_page(self.meta_page)
         except:
-            log.warn("no %s definitions" % meta_page)
+            log.warn("Aliases: no %s definitions" % self.meta_page)
             return
 
         # prepare to parse only <pre> tags (so that we can have multiple maps organized by sections)
         soup = BeautifulSoup(render_markup(page['data'],page['content-type']))
+        h = HTMLParser.HTMLParser()
 
         all_sections = u''.join(map(lambda t: str(t.string), soup.find_all('pre'))).strip()
         # now that we have the full map, let's build the schema hash
-
         for line in all_sections.split('\n'):
             try:
-                (acronym, expansion) = line.split(' ',1)
-                self.acronyms[acronym.lower()] = expansion
-            except ValueError: # skip lines with more than two fields
+                (link, replacement) = line.strip().split(' ',1)
+                self.aliases[link] = replacement
+                self.aliases[link.replace('_',' ')] = replacement
+            except ValueError:
                 log.warn("skipping line '%s'" % line)
                 pass
+        self.mtime = time.time()
     
 
     def run(self, serial, tag, tagname, pagename, soup, request, response):
         s = Store()
         if (self.mtime < s.mtime(self.meta_page)):
             self.load()
+
         try:
-            acronym = ''.join(tag.find_all(text=re.compile('.+'))).strip().lower()
-        except:
+            link = tag['href']
+        except KeyError:
             return True
 
-        if acronym in self.acronyms.keys():
-            meaning = self.acronyms[acronym]
-            tag['title'] = meaning
-            # this tag does not need to be re-processed
-            return False
+        while True: # expand multiple aliases if required
+            stack = [] # avoid loops
+            try:
+                alias = self.aliases[tag['href']]
+                if alias not in stack:
+                    stack.append(alias)
+                    tag['href'] = alias
+                else: # avoid loops
+                    break
+            except:
+                break
+        # this tag may need to be re-processed by another plugin
         return True
