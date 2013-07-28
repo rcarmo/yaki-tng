@@ -1,5 +1,6 @@
 From: Rui Carmo
 Title: Tests
 
-* [Syntax Highlighting](./highlight)
+* [Acronyms](./acronyms)
 * [InterWiki Map](./interwiki)
+* [Syntax Highlighting](./highlight)

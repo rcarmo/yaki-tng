@@ -13,7 +13,7 @@ log = logging.getLogger()
 
 import urlparse, re, time
 from bs4 import BeautifulSoup, SoupStrainer
-from yaki import Store, plugin
+from yaki import Store, plugin, render_markup
 from utils.core import Singleton
 
 meta_page = 'meta/Acronyms'
@@ -27,11 +27,14 @@ class Acronyms:
     tags      = ['span','caps']
     meta_page = 'meta/Acronyms'
     mtime     = 0
+    acronyms  = {}
 
     def __init__(self):
         log.debug(self)
 
+
     def load(self):
+        # Load acronym map
         s = Store()
         try:
             page = s.get_page(self.meta_page)
@@ -41,7 +44,6 @@ class Acronyms:
 
         # prepare to parse only <pre> tags (so that we can have multiple maps organized by sections)
         soup = BeautifulSoup(render_markup(page['data'],page['content-type']))
-        h = HTMLParser.HTMLParser()
 
         all_sections = u''.join(map(lambda t: str(t.string), soup.find_all('pre'))).strip()
         # now that we have the full map, let's build the schema hash
@@ -54,13 +56,16 @@ class Acronyms:
                 log.warn("skipping line '%s'" % line)
                 pass
     
-    
+
     def run(self, serial, tag, tagname, pagename, soup, request, response):
+        s = Store()
+        if (self.mtime < s.mtime(self.meta_page)):
+            self.load()
         try:
-            acronym = ''.join(tag.find_all(text=re.compile('.+')))
+            acronym = ''.join(tag.find_all(text=re.compile('.+'))).strip().lower()
         except:
             return True
-        acronym = acronym.lower()
+
         if acronym in self.acronyms.keys():
             meaning = self.acronyms[acronym]
             tag['title'] = meaning

@@ -22,11 +22,11 @@ import HTMLParser
 class InterWiki:
     __metaclass__ = Singleton
 
-    category = 'markup'
-    tags     = ['a']
-    wiki_map = 'meta/InterWikiMap'
-    schemas  = {}
-    mtime    = 0
+    category  = 'markup'
+    tags      = ['a']
+    meta_page = 'meta/InterWikiMap'
+    schemas   = {}
+    mtime     = 0
 
 
     def __init__(self):
@@ -37,9 +37,9 @@ class InterWiki:
         # load InterWikiMap
         s = Store()
         try:
-            page = s.get_page(self.wiki_map)
+            page = s.get_page(self.meta_page)
         except:
-            log.warn("InterWikiMap: no %s definitions" % self.wiki_map)
+            log.warn("InterWikiMap: no %s definitions" % self.meta_page)
             return
 
         # prepare to parse only <pre> tags (so that we can have multiple maps organized by sections)
@@ -60,7 +60,7 @@ class InterWiki:
 
     def run(self, serial, tag, tagname, pagename, soup, request, response):
         s = Store()
-        if (self.mtime < s.mtime(self.wiki_map)):
+        if (self.mtime < s.mtime(self.meta_page)):
             self.load()
 
         try:
@@ -80,7 +80,7 @@ class InterWiki:
                 try:
                     uri = self.schemas[schema] % link
                 except:
-                    print "Error in processing Interwiki link (%s,%s,%s)" % (schema, link, self.schemas[schema])
+                    log.error("Error in processing Interwiki link (%s,%s,%s)" % (schema, link, self.schemas[schema]))
                     uri = self.schemas[schema] + link
             else:
                 uri = self.schemas[schema] + link
