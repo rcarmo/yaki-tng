@@ -3,8 +3,6 @@ Date: 2011-06-17 23:43:00
 Content-Type: text/x-markdown
 Title: Documentation
 
-# Documentation
-
 [Yaki][yd] runs on [Bottle][b], a [Python][p] microframework.
 
 Under this tree you'll find (in progress) documentation:
