@@ -22,7 +22,6 @@ import HTMLParser
 class InterWiki:
     __metaclass__ = Singleton
 
-
     category = 'markup'
     tags     = ['a']
     wiki_map = 'meta/InterWikiMap'
