@@ -47,6 +47,20 @@ def sink(iter, steps=None):
         next(itertools.islice(iter, steps, steps), None)
 
 
+
+def make_unique(seq, transform=None):
+    """Remove duplicate items from a sequence"""
+    
+    if transform is None: 
+        def transform(x): return x 
+    seen = {} 
+    for item in seq: 
+        marker = transform(item) 
+        if marker not in seen:
+            seen[marker] = True
+            yield item
+
+
 def pipeline(source, functions):
     """Apply an array of functions to a source iterable"""
 
