@@ -37,6 +37,8 @@ def render_markup(raw, markup=u'text/html'):
     def _html(raw):
         return raw
     
+    log.debug(markup)
+
     return {
         u'text/plain'         : _plaintext,
         u'text/x-web-markdown': _markdown,

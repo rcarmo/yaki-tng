@@ -45,13 +45,15 @@ def parse_page(buffer, mime_type='text/plain'):
     headers = {}
     markup  = ''
     if mime_type in ['text/plain', 'text/x-textile', 'text/x-markdown']:
-      try:
-        (header_lines,markup) = buffer.split("\n\n", 1)
-        for header in header_lines.strip().split("\n"):
-          (name, value) = header.strip().split(":", 1)
-          headers[name.lower().strip()] = unicode(value.strip())
-      except:
-        raise TypeError, "Invalid page file format."
+        try:
+            (header_lines,markup) = buffer.split("\n\n", 1)
+            for header in header_lines.strip().split("\n"):
+                (name, value) = header.strip().split(":", 1)
+                headers[name.lower().strip()] = unicode(value.strip())
+            if 'content-type' in headers:
+                mime_type = headers['content-type']
+        except:
+            raise TypeError, "Invalid page file format."
     return headers, markup, mime_type
 
 
@@ -170,7 +172,6 @@ class Store:
                     pass
                 return {'headers': headers, 'data': markup, 'content-type': mime_type}
             except IOError:
-                print "IOError cascade!"
                 raise IOError, "Couldn't find page %s." % (pagename)
         else:
              raise IOError, "Couldn't find page %s." % (pagename)
