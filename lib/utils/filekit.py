@@ -7,7 +7,7 @@ Description: File utility functions
 License: MIT (see LICENSE.md for details)
 """
 
-import os, sys, logging, ZipFile
+import os, sys, logging, zipfile
 
 log = logging.getLogger()
 
