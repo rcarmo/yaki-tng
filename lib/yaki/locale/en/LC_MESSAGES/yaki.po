@@ -1,3 +1,13 @@
+# pathnames
+msgid "timed_path"
+msgstr "0000/00/00/0000"
+
+msgid "latest_blog"
+msgstr "^(blog)\/(\d+){4}\/(\d+){2}\/(\d+){2}.*"
+
+msgid "latest_link"
+msgstr "^(links)\/(\d+){4}\/(\d+){2}\/(\d+){2}.*"
+
 # page components
 msgid "pagetrail"
 msgstr "Page Trail"
