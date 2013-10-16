@@ -234,11 +234,11 @@ class RouterUnknownModeError(RouteError): pass
 
 
 class RouteSyntaxError(RouteError):
-    """ The route parser found something not supported by this router """
+    """ The route parser found something not supported by this router. """
 
 
 class RouteBuildError(RouteError):
-    """ The route could not been built """
+    """ The route could not be built. """
 
 
 def _re_flatten(p):
@@ -2335,12 +2335,26 @@ def _file_iter_range(fp, offset, bytes, maxread=1024*1024):
         yield part
 
 
-def static_file(filename, root, mimetype='auto', download=False):
+def static_file(filename, root, mimetype='auto', download=False, charset='UTF-8'):
     """ Open a file in a safe way and return :exc:`HTTPResponse` with status
-        code 200, 305, 401 or 404. Set Content-Type, Content-Encoding,
-        Content-Length and Last-Modified header. Obey If-Modified-Since header
-        and HEAD requests.
+        code 200, 305, 401 or 404. The ``Content-Type``, ``Content-Encoding``,
+        ``Content-Length`` and ``Last-Modified`` headers are set if possible.
+        Special support for ``If-Modified-Since``, ``Range`` and ``HEAD``
+        requests.
+
+        :param filename: Name or path of the file to send.
+        :param root: Root path for file lookups. Should be an absolute directory
+            path.
+        :param mimetype: Defines the content-type header (default: guess from
+            file extension)
+        :param download: If True, ask the browser to open a `Save as...` dialog
+            instead of opening the file with the associated program. You can
+            specify a custom filename as a string. If not specified, the
+            original filename is used (default: False).
+        :param charset: The charset to use for files with a ``text/*``
+            mime-type. (default: UTF-8)
     """
+
     root = os.path.abspath(root) + os.sep
     filename = os.path.abspath(os.path.join(root, filename.strip('/\\')))
     headers = dict()
@@ -2354,9 +2368,11 @@ def static_file(filename, root, mimetype='auto', download=False):
 
     if mimetype == 'auto':
         mimetype, encoding = mimetypes.guess_type(filename)
-        if mimetype: headers['Content-Type'] = mimetype
         if encoding: headers['Content-Encoding'] = encoding
-    elif mimetype:
+
+    if mimetype:
+        if mimetype[:5] == 'text/' and charset and 'charset' not in mimetype:
+            mimetype += '; charset=%s' % charset
         headers['Content-Type'] = mimetype
 
     if download:
@@ -2635,20 +2651,36 @@ class FlupFCGIServer(ServerAdapter):
 
 
 class WSGIRefServer(ServerAdapter):
-    def run(self, handler): # pragma: no cover
-        from wsgiref.simple_server import make_server, WSGIRequestHandler
-        if self.quiet:
-            class QuietHandler(WSGIRequestHandler):
-                def log_request(*args, **kw): pass
-            self.options['handler_class'] = QuietHandler
-        srv = make_server(self.host, self.port, handler, **self.options)
+    def run(self, app): # pragma: no cover
+        from wsgiref.simple_server import WSGIRequestHandler, WSGIServer
+        from wsgiref.simple_server import make_server
+        import socket
+
+        class FixedHandler(WSGIRequestHandler):
+            def address_string(self): # Prevent reverse DNS lookups please.
+                return self.client_address[0]
+            def log_request(*args, **kw):
+                if not self.quiet:
+                    return WSGIRequestHandler.log_request(*args, **kw)
+
+        handler_cls = self.options.get('handler_class', FixedHandler)
+        server_cls  = self.options.get('server_class', WSGIServer)
+
+        if ':' in self.host: # Fix wsgiref for IPv6 addresses.
+            if getattr(server_cls, 'address_family') == socket.AF_INET:
+                class server_cls(server_cls):
+                    address_family = socket.AF_INET6
+
+        srv = make_server(self.host, self.port, app, server_cls, handler_cls)
         srv.serve_forever()
 
 
 class CherryPyServer(ServerAdapter):
     def run(self, handler): # pragma: no cover
         from cherrypy import wsgiserver
-        server = wsgiserver.CherryPyWSGIServer((self.host, self.port), handler)
+        self.options['bind_addr'] = (self.host, self.port)
+        self.options['wsgi_app'] = handler
+        server = wsgiserver.CherryPyWSGIServer(**self.options)
         try:
             server.start()
         finally:
@@ -3201,10 +3233,16 @@ class SimpleTemplate(BaseTemplate):
         self.encoding = parser.encoding
         return code
 
-    def _rebase(self, _env, _name, **kwargs):
+    def _rebase(self, _env, _name=None, **kwargs):
+        if _name is None:
+            depr('Rebase function called without arguments.'
+                 ' You were probably looking for {{base}}?', True)
         _env['_rebase'] = (_name, kwargs)
 
-    def _include(self, _env, _name, **kwargs):
+    def _include(self, _env, _name=None, **kwargs):
+        if _name is None:
+            depr('Rebase function called without arguments.'
+                 ' You were probably looking for {{base}}?', True)
         env = _env.copy()
         env.update(kwargs)
         if _name not in self.cache:
@@ -3222,7 +3260,7 @@ class SimpleTemplate(BaseTemplate):
         eval(self.co, env)
         if env.get('_rebase'):
             subtpl, rargs = env.pop('_rebase')
-            rargs['body'] = ''.join(_stdout) #copy stdout
+            rargs['base'] = ''.join(_stdout) #copy stdout
             del _stdout[:] # clear stdout
             return self._include(env, subtpl, **rargs)
         return env
@@ -3261,7 +3299,7 @@ class StplParser(object):
     # 7: And finally, a single newline. The 8th token is 'everything else'
     _re_tok += '|(\\r?\\n)'
     # Match the start tokens of code areas in a template
-    _re_split = '(?m)^[ \t]*(?:(%(line_start)s)|(%(block_start)s))'
+    _re_split = '(?m)^[ \t]*(\\\\?)((%(line_start)s)|(%(block_start)s))(%%?)'
     # Match inline statements (may contain python strings)
     _re_inl = '%%(inline_start)s((?:%s|[^\'"\n]*?)+)%%(inline_end)s' % _re_inl
 
@@ -3300,13 +3338,19 @@ class StplParser(object):
                 text = self.source[self.offset:self.offset+m.start()]
                 self.text_buffer.append(text)
                 self.offset += m.end()
-                if self.source[self.offset] == '%': # Escaped code stuff
-                    line, sep, _ = self.source[self.offset+1:].partition('\n')
-                    self.text_buffer.append(m.group(0)+line+sep)
+                if m.group(1): # New escape syntax
+                    line, sep, _ = self.source[self.offset:].partition('\n')
+                    self.text_buffer.append(m.group(2)+m.group(5)+line+sep)
+                    self.offset += len(line+sep)+1
+                    continue
+                elif m.group(5): # Old escape syntax
+                    depr('Escape code lines with a backslash.')
+                    line, sep, _ = self.source[self.offset:].partition('\n')
+                    self.text_buffer.append(m.group(2)+line+sep)
                     self.offset += len(line+sep)+1
                     continue
                 self.flush_text()
-                self.read_code(multiline=bool(m.group(2)))
+                self.read_code(multiline=bool(m.group(4)))
             else: break
         self.text_buffer.append(self.source[self.offset:])
         self.flush_text()
@@ -3372,16 +3416,16 @@ class StplParser(object):
         return '_escape(%s)' % chunk
 
     def write_code(self, line, comment=''):
-        line, comment = self.fix_brackward_compatibility(line, comment)
+        line, comment = self.fix_backward_compatibility(line, comment)
         code  = '  ' * (self.indent+self.indent_mod)
         code += line.lstrip() + comment + '\n'
         self.code_buffer.append(code)
 
-    def fix_brackward_compatibility(self, line, comment):
+    def fix_backward_compatibility(self, line, comment):
         parts = line.strip().split(None, 2)
         if parts and parts[0] in ('include', 'rebase'):
             depr('The include and rebase keywords are functions now.')
-            if len(parts) == 1:   return "_printlist([body])", comment
+            if len(parts) == 1:   return "_printlist([base])", comment
             elif len(parts) == 2: return "_=%s(%r)" % tuple(parts), comment
             else:                 return "_=%s(%r, %s)" % tuple(parts), comment
         if self.lineno <= 2 and not line.strip() and 'coding' in comment:
@@ -3548,10 +3592,11 @@ if __name__ == '__main__':
     sys.modules.setdefault('bottle', sys.modules['__main__'])
 
     host, port = (opt.bind or 'localhost'), 8080
-    if ':' in host:
+    if ':' in host and host.rfind(']') < host.rfind(':'):
         host, port = host.rsplit(':', 1)
+    host = host.strip('[]')
 
-    run(args[0], host=host, port=port, server=opt.server,
+    run(args[0], host=host, port=int(port), server=opt.server,
         reloader=opt.reload, plugins=opt.plugin, debug=opt.debug)
 
 
