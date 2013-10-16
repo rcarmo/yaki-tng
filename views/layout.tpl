@@ -54,7 +54,7 @@
         <!-- TODO: sidebar -->
         <div id="main" class="ink-grid">
             <h1>{{title}}</h1>
-            %include
+            {{!base}}
         </div>
         <!-- TODO: footer -->
         <div class="screen-size-helper">
