@@ -1,11 +1,11 @@
 # Original class by Andrew Rowls
 
-from socket import create_connection
+from socket import create_connection, IPPROTO_TCP, TCP_NODELAY
 
 class RedisClient(object):
     def __init__(self, host='localhost', port=6379):
         self.sock = create_connection((host, port))
-        self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        self.sock.setsockopt(IPPROTO_TCP, TCP_NODELAY, 1)
         self.file = self.sock.makefile()
 
     def __getattr__(self, attr):
@@ -21,6 +21,7 @@ class RedisClient(object):
 
         def error(*a): raise Exception(*a)
 
+        print rsp
         type, body = rsp[0], rsp[1:-2]
         return {
             '+': lambda: body,

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# vim: et, ts=4, sw=4
 """
 Main application script
 
@@ -11,7 +12,7 @@ import os, sys, json, logging, logging.config
 # Make sure our bundled libraries take precedence
 sys.path.insert(0,os.path.join(os.path.dirname(os.path.abspath(__file__)),'lib'))
 
-import config, utils, bottle
+import config, utils, bottle, miniredis.client, miniredis.server
 
 # read configuration file
 config.settings = utils.get_config(os.path.join(utils.path_for('etc'),'wiki.json'))
@@ -33,6 +34,13 @@ if __name__ == "__main__":
         log.info("Setting up application.")
         import api, routes, controllers
         log.info("Serving requests.")
+
+    # Launch our bundled Redis server
+    if config.settings.miniredis and 'BOTTLE_CHILD' not in os.environ:
+        try:
+            client = miniredis.client.RedisClient()
+        except Exception, e:
+            miniredis.server.fork()
 
     bottle.run(
         port     = config.settings.http.port, 

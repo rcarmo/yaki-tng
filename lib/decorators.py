@@ -14,10 +14,36 @@ try:
     import json
 except ImportError:
     import simplejson as json
- 
+
 log = logging.getLogger()
 
 gmt_format_string = "%a, %d %b %Y %H:%M:%S GMT"
+
+
+def redis_cache(redis, ttl=3600):
+    """Cache route results in Redis"""
+
+    def decorator(callback):
+        @functools.wraps(callback)
+        def wrapper(*args, **kwargs):
+            try:
+                item = json.loads(redis.get('url:%s' % request.urlparts.path))
+                body = item['body']
+                for h in item['headers']:
+                    response.set_header(h, item['headers'][h])
+                response.set_header('X-Source', 'Redis')
+            except:
+                body = callback(*args, **kwargs)
+                item = {
+                    'body': body,
+                    'headers': dict(response.headers),
+                    'mtime': int(time.time())
+                }
+                redis.set('url:%s' % request.urlparts.path, json.dumps(item))
+            return body
+        return wrapper
+    return decorator
+
 
 def cache_results(timeout):
     """Cache route results for a given period of time"""
@@ -60,7 +86,7 @@ def cache_results(timeout):
                 _times[now] = request.urlparts
 
             expire(now)
-            return body            
+            return body
         return wrapper
     return decorator
 
@@ -72,7 +98,7 @@ def cache_control(seconds = 0):
         @functools.wraps(callback)
         def wrapper(*args, **kwargs):
             expires = int(time.time() + seconds)
-            expires = time.strftime(gmt_format_string, time.gmtime(expires)) 
+            expires = time.strftime(gmt_format_string, time.gmtime(expires))
             response.set_header('Expires', expires)
             if seconds:
                 pragma = 'public'
@@ -146,15 +172,15 @@ def check(**types):
         farg, _, _, def_params = inspect.getargspec(callback)
         if def_params is None: def_params = []
         farg = farg[:len(farg) - len(def_params)]
- 
+
         param_info = [(par, ptype, par in farg) for par, ptype in types.iteritems()]
- 
+
         @functools.wraps(f)
         def wrapper(*args, **kargs):
             getparam = request.GET.get
             for par, ptype, required in param_info:
                 value = getparam(par)
-                if not value: # None or empty str 
+                if not value: # None or empty str
                     if required:
                         error = "%s() requires the parameter %s" % (wrapper.__name__, par)
                         raise TypeError(error)
@@ -164,7 +190,7 @@ def check(**types):
                 except:
                     error = "Cannot convert parameter %s to %s" % (par, ptype.__name__)
                     raise ValueError(error)
- 
+
             return callback(*args, **kargs)
         return wrapper
     return decorator

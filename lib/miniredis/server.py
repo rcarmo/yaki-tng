@@ -57,17 +57,17 @@ class RedisClient(object):
 class RedisServer(object):
     """Server class"""
 
-    def __init__(self, config):
+    def __init__(self, host='127.0.0.1', port='6379', storage_path='/tmp', config=None):
         """Initialization"""
         super(RedisServer, self).__init__()
-        self.host = config.net.bind_address
-        self.port = config.net.port
+        self.host = config.net.bind_address if config else host
+        self.port = config.net.port if config else port
         self.halt = True
         self.clients = {}
         self.tables = {}
         self.channels = {}
         self.lastsave = int(time.time())
-        self.path = config.storage.path
+        self.path = config.storage.path if config else storage_path
         self.meta = Haystack(self.path,'meta')
 
 
@@ -505,7 +505,7 @@ def main(args):
     if pid_file:
         with open(pid_file, 'w') as f:
             f.write('%s\n' % os.getpid())
-    m = MiniRedis(host=host, port=port, log_file=log_file, db_file=db_file)
+    m = RedisServer(host=host, port=port, log_file=log_file, db_file=db_file)
     try:
         m.run()
     except KeyboardInterrupt:
@@ -514,6 +514,18 @@ def main(args):
         os.unlink(pid_file)
     sys.exit(0)
 
+def fork(host='127.0.0.1', port=6379):
+    try:
+        pid = os.fork()
+        if pid > 0:
+            return
+        m = RedisServer(host, port)
+        m.run()
+    except KeyboardInterrupt:
+        m.stop()
+    except OSError, e:
+        print >> sys.stderr, "Failed to launch Redis subprocess: %d (%s)" % (e.errno, e.strerror)
+        sys.exit(1)
 
 if __name__ == '__main__':
     main(sys.argv[1:])

@@ -7,6 +7,38 @@ Created by: Rui Carmo
 License: MIT (see LICENSE for details)
 """
 
+from operator import itemgetter
+
+def linear_partition(seq, k):
+    if k <= 0:
+        return []
+    n = len(seq) - 1
+    if k > n:
+        return map(lambda x: [x], seq)
+    table, solution = linear_partition_table(seq, k)
+    k, ans = k-2, []
+    while k >= 0:
+        ans = [[seq[i] for i in xrange(solution[n-1][k]+1, n+1)]] + ans
+        n, k = solution[n-1][k], k-1
+    return [[seq[i] for i in xrange(0, n+1)]] + ans
+
+
+def linear_partition_table(seq, k):
+    n = len(seq)
+    table = [[0] * k for x in xrange(n)]
+    solution = [[0] * (k-1) for x in xrange(n-1)]
+    for i in xrange(n):
+        table[i][0] = seq[i] + (table[i-1][0] if i else 0)
+    for j in xrange(k):
+        table[0][j] = seq[0]
+    for i in xrange(1, n):
+        for j in xrange(1, k):
+            table[i][j], solution[i-1][j-1] = min(
+                ((max(table[x][j-1], table[i][0]-table[x][0]), x) for x in xrange(i)),
+                key=itemgetter(0))
+    return (table, solution)
+
+
 def get_info(data):
     """Parses a small buffer and attempts to return basic image metadata"""
     

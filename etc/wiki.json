@@ -1,6 +1,7 @@
 {
     "debug": true,
     "reloader": true,
+    "miniredis": true,
     "environment": "dev",
     "http": {
         "bind_address": "127.0.0.1",

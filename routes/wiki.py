@@ -16,8 +16,11 @@ from utils import path_for
 from yaki import Store
 from yaki.decorators import render
 
-from decorators import timed
+from decorators import timed, redis_cache, cache_control
 
+from miniredis.client import RedisClient
+
+r = RedisClient()
 
 @route('/')
 @route('/space')
@@ -28,7 +31,7 @@ def root():
 
 @route('/space/<page:path>')
 @timed
-#@redis_cache('html')
+@redis_cache(r)
 @view('wiki')
 #@redis_cache('markup')
 @render()
@@ -36,7 +39,8 @@ def wiki(page):
     s = Store(path_for(settings.content.path))
     try:
         result = s.get_page(page.lower())
-    except:
+    except Exception, e:
+        log.warn("%s rendering page %s" % (e, page))
         result = s.get_page('meta/EmptyPage')
 
     return result

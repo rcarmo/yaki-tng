@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# vim: et, ts=4, sw=4
+
 import os, sys, logging
 
 log = logging.getLogger()
