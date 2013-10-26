@@ -523,6 +523,7 @@ def fork(host='127.0.0.1', port=6379):
         m.run()
     except KeyboardInterrupt:
         m.stop()
+        sys.exit(0)
     except OSError, e:
         print >> sys.stderr, "Failed to launch Redis subprocess: %d (%s)" % (e.errno, e.strerror)
         sys.exit(1)
