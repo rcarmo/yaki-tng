@@ -344,3 +344,6 @@ msgstr "Saturday"
 
 msgid "Sunday"
 msgstr "Sunday"
+
+msgid "translation_applied"
+msgstr "English translations applied"
