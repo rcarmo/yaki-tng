@@ -14,6 +14,8 @@ import socket, select, thread, errno
 
 from haystack import Haystack
 
+log = logging.getLogger()
+
 class RedisConstant(object):
     def __init__(self, type):
         self.type = type
@@ -62,17 +64,17 @@ class RedisClient(object):
 class RedisServer(object):
     """Server class"""
 
-    def __init__(self, host='127.0.0.1', port='6379', storage_path='/tmp', config=None):
+    def __init__(self, host='127.0.0.1', port='6379', storage_path='/tmp', settings=None):
         """Initialization"""
         super(RedisServer, self).__init__()        
-        self.host = config.redis.bind_address if config else host
-        self.port = config.redis.port if config else port
+        self.host = settings.bind_address if settings != None else host
+        self.port = settings.port if settings != None else port
         self.halt = True
         self.clients = {}
         self.tables = {}
         self.channels = {}
         self.lastsave = int(time.time())
-        self.path = config.redis.storage.path if config else storage_path
+        self.path = settings.storage.path if settings != None else storage_path
         self.meta = Haystack(self.path,'redisdb')
         self.expiries = self.meta.get('expiries',{})
         self.logger = logging.getLogger()
@@ -111,7 +113,7 @@ class RedisServer(object):
             who = '%s:%s' % client.socket.getpeername() if client else 'SERVER'
         except:
             who = '<CLOSED>'
-        self.logger.debug("%s: %s" % (who, s))
+        log.debug("%s: %s" % (who, s))
 
 
     def handle(self, client):
@@ -625,8 +627,8 @@ def fork(settings):
         pid = os.fork()
         if pid > 0:
             return
-        logging.config.dictConfig(dict(settings.logging))
-        m = RedisServer(settings)
+#        logging.config.dictConfig(dict(settings.logging))
+        m = RedisServer(settings=settings)
         m.run()
     except KeyboardInterrupt:
         m.stop()
