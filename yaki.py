@@ -5,6 +5,7 @@
 Main application script
 
 Created by: Rui Carmo
+License: MIT (see LICENSE.md for details)
 """
 
 import os, sys, json, logging, logging.config
@@ -12,39 +13,42 @@ import os, sys, json, logging, logging.config
 # Make sure our bundled libraries take precedence
 sys.path.insert(0,os.path.join(os.path.dirname(os.path.abspath(__file__)),'lib'))
 
-import config, utils, bottle, miniredis.client, miniredis.server
-
-# read configuration file
-config.settings = utils.get_config(os.path.join(utils.path_for('etc'),'wiki.json'))
-
-# Set up logging
-logging.config.dictConfig(dict(config.settings.logging))
+import utils, bottle
+import miniredis.client, miniredis.server
+from config import settings
 
 log = logging.getLogger()
 
 if __name__ == "__main__":
 
-    if config.settings.reloader:
-        if 'BOTTLE_CHILD' not in os.environ:
-            log.debug('Using reloader, spawning first child.')
+    if settings.reloader:
+        if "BOTTLE_CHILD" not in os.environ:
+            log.debug("Using reloader, spawning first child.")
         else:
-            log.debug('Child spawned.')
+            log.debug("Child spawned.")
 
-    if not config.settings.reloader or ('BOTTLE_CHILD' in os.environ):
+    # Launch our bundled Redis server
+    if settings.miniredis and "BOTTLE_CHILD" not in os.environ:
+        try:
+            client = miniredis.client.RedisClient()
+            log.debug("Connected to Redis")
+        except Exception, e:
+            log.debug("Spawning Redis")
+            miniredis.server.fork(settings)
+
+    # Bind routes
+    if not settings.reloader or ("BOTTLE_CHILD" in os.environ):
         log.info("Setting up application.")
         import api, routes, controllers
         log.info("Serving requests.")
 
-    # Launch our bundled Redis server
-    if config.settings.miniredis and 'BOTTLE_CHILD' not in os.environ:
-        try:
-            client = miniredis.client.RedisClient()
-        except Exception, e:
-            miniredis.server.fork()
+    log.warn("foo")
+    log.error("foo")
+    log.critical("foo")
 
     bottle.run(
-        port     = config.settings.http.port, 
-        host     = config.settings.http.bind_address, 
-        debug    = config.settings.debug,
-        reloader = config.settings.reloader
+        port     = settings.http.port, 
+        host     = settings.http.bind_address, 
+        debug    = settings.debug,
+        reloader = settings.reloader
     )
