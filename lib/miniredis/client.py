@@ -1,6 +1,17 @@
-# Original class by Andrew Rowls
+#!/usr/bin/env python
+# encoding: utf-8
+"""
+Based on a minimalist Redis client originally written by Andrew Rowls
 
+Created by Rui Carmo on 2013-03-12
+Published under the MIT license.
+"""
+
+import os, sys, logging
 from socket import create_connection, IPPROTO_TCP, TCP_NODELAY
+
+log = logging.getLogger()
+
 
 class RedisClient(object):
     def __init__(self, host='localhost', port=6379):
@@ -18,10 +29,11 @@ class RedisClient(object):
 
     def parse_response(self):
         rsp = self.file.readline()
+        if not rsp:
+            return
 
         def error(*a): raise Exception(*a)
 
-        print rsp
         type, body = rsp[0], rsp[1:-2]
         return {
             '+': lambda: body,

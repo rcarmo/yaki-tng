@@ -36,6 +36,24 @@ class InMemoryHandler(logging.Handler):
 
     def dump(self):
         return self.records
+        
+
+class ColorFormatter(logging.Formatter) :
+    """Console logging formatter with coloring"""
+    _colors  = {
+      "DEBUG"   : "\033[22;32m", # green
+      "INFO"    : "\033[01;34m", # violet
+      "WARNING" : "\033[22;35m", # magenta
+      "ERROR"   : "\033[22;31m", # red
+      "CRITICAL": "\033[01;31m"  # bold red
+    };    
+
+    def format(self, record):
+        if '256color' in os.environ.get('TERM', ''):
+            if(self._colors.has_key(record.levelname)):
+                record.levelname = "%s%s\033[0;0m" % (self._colors[record.levelname],  record.levelname)
+            record.name = "\033[37m\033[1m%s\033[0;0m" % record.name
+        return logging.Formatter.format(self, record)  
 
 
 class PygmentsHandler(logging.StreamHandler):

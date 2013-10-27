@@ -1,14 +1,18 @@
 #!/usr/bin/env python
+# encoding: utf-8
+"""
 # Based on a minimalist Redis server originally written by Benjamin Pollack
+
+Created by Rui Carmo on 2013-03-12
+License: MIT (see LICENSE.md for details)
+"""
 
 from __future__ import with_statement
 from collections import deque
 import os, sys, time, logging
 import socket, select, thread, errno
 
-log = logging.getLogger()
-
-from .haystack import Haystack
+from haystack import Haystack
 
 class RedisConstant(object):
     def __init__(self, type):
@@ -60,17 +64,18 @@ class RedisServer(object):
 
     def __init__(self, host='127.0.0.1', port='6379', storage_path='/tmp', config=None):
         """Initialization"""
-        super(RedisServer, self).__init__()
-        self.host = config.net.bind_address if config else host
-        self.port = config.net.port if config else port
+        super(RedisServer, self).__init__()        
+        self.host = config.redis.bind_address if config else host
+        self.port = config.redis.port if config else port
         self.halt = True
         self.clients = {}
         self.tables = {}
         self.channels = {}
         self.lastsave = int(time.time())
-        self.path = config.storage.path if config else storage_path
+        self.path = config.redis.storage.path if config else storage_path
         self.meta = Haystack(self.path,'redisdb')
         self.expiries = self.meta.get('expiries',{})
+        self.logger = logging.getLogger()
 
 
     def dump(self, client, o):
@@ -106,7 +111,7 @@ class RedisServer(object):
             who = '%s:%s' % client.socket.getpeername() if client else 'SERVER'
         except:
             who = '<CLOSED>'
-        log.debug("%s: %s" % (who, s))
+        self.logger.debug("%s: %s" % (who, s))
 
 
     def handle(self, client):
@@ -614,12 +619,14 @@ def main(args):
         os.unlink(pid_file)
     sys.exit(0)
 
-def fork(host='127.0.0.1', port=6379):
+
+def fork(settings):
     try:
         pid = os.fork()
         if pid > 0:
             return
-        m = RedisServer(host, port)
+        logging.config.dictConfig(dict(settings.logging))
+        m = RedisServer(settings)
         m.run()
     except KeyboardInterrupt:
         m.stop()

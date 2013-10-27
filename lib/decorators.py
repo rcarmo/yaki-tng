@@ -41,7 +41,7 @@ def redis_cache(redis, prefix='url', ttl=3600):
                 }
                 k = '%s:%s' % (prefix, request.urlparts.path)
                 redis.set(k, json.dumps(item))
-                #redis.expire(k, ttl)
+                redis.expire(k, ttl)
             return body
         return wrapper
     return decorator

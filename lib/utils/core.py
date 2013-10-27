@@ -70,15 +70,7 @@ def get_config(filename=None):
 
     if not filename:
         return Struct({})
-    try:
-        config = Struct(json.load(open(filename, 'r'),object_hook=json_str))
-    except Exception as e:
-        if sys.stderr.isatty():
-            print >> sys.stderr, ('Error loading configuration file %(filename)s: %(e)s' % locals())
-        else:
-            log.error('Error loading configuration file %(filename)s: %(e)s' % locals())
-        sys.exit(2)
-    return config
+    return Struct(json.load(open(filename, 'r'),object_hook=json_str))
 
 
 def safe_eval(buffer):
