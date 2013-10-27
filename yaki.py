@@ -34,17 +34,13 @@ if __name__ == "__main__":
             log.debug("Connected to Redis")
         except Exception, e:
             log.debug("Spawning Redis")
-            miniredis.server.fork(settings)
+            miniredis.server.fork(settings.redis)
 
     # Bind routes
     if not settings.reloader or ("BOTTLE_CHILD" in os.environ):
         log.info("Setting up application.")
         import api, routes, controllers
         log.info("Serving requests.")
-
-    log.warn("foo")
-    log.error("foo")
-    log.critical("foo")
 
     bottle.run(
         port     = settings.http.port, 
