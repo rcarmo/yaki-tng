@@ -36,5 +36,14 @@ Yaki has always been designed around three simple rules:
 
 All of these are, of course, applied within reason.
 
+
+# Dev Notes
+
+Before starting work, make sure you run:
+
+    python tools/msgfmt.py lib/yaki/locale/en/LC_MESSAGES/yaki.po
+    
+...to create the translation file(s).
+
 [b]: http://bottlepy.org
 [y]: https://github.com/rcarmo/yaki
