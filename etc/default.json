@@ -49,14 +49,14 @@
         "loggers": {
             "yaki.*": {
                 "level"   : "INFO",
-                "handlers": ["pygments-http"],
+                "handlers": ["console"],
                 "propagate": false
             },
             "whoosh": {
                 "level"   : "DEBUG",
                 "handlers": ["console"]
             },
-            "gettext": {
+            "bottle": {
                 "level"   : "DEBUG",
                 "handlers": ["console"],
                 "propagate": false
