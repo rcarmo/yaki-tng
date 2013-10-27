@@ -1,0 +1,70 @@
+{
+    "debug": true,
+    "reloader": true,
+    "miniredis": true,
+    "environment": "dev",
+    "http": {
+        "bind_address": "127.0.0.1",
+        "port": 8000
+    },
+    "redis": {
+        "bind_address": "127.0.0.1",
+        "port": 6379,
+        "storage": { 
+            "path": "/tmp" 
+        }
+    },
+    "content": {
+        "path":  "data/main",
+        "homepage": "/space/HomePage"
+    },
+    "logging": {
+        "version": 1,
+        "formatters": {
+            "http": {
+                "format" : "localhost - - [%(asctime)s] %(process)d \"%(levelname)s %(filename)s/%(funcName)s:%(lineno)d\" %(message)s",
+                "datefmt": "%d/%b/%Y %H:%M:%S"
+            },
+            "color": {
+                "()": "utils.logkit.ColorFormatter",
+                "format" : "localhost - - [%(asctime)s] %(process)d \"%(levelname)s %(filename)s/%(funcName)s:%(lineno)d\" %(message)s",
+                "datefmt": "%d/%b/%Y %H:%M:%S"
+            }
+        },
+        "handlers": {
+            "console": {
+                "class"    : "logging.StreamHandler",
+                "formatter": "color",
+                "level"    : "DEBUG",
+                "stream"   : "ext://sys.stdout"
+            },
+            "pygments-http" : {
+                "class"    : "utils.logkit.PygmentsHandler",
+                "formatter": "http",
+                "level"    : "DEBUG",
+                "stream"   : "ext://sys.stderr",
+                "syntax"   : "guess"
+            }
+        },
+        "loggers": {
+            "yaki.*": {
+                "level"   : "INFO",
+                "handlers": ["pygments-http"],
+                "propagate": false
+            },
+            "whoosh": {
+                "level"   : "DEBUG",
+                "handlers": ["console"]
+            },
+            "gettext": {
+                "level"   : "DEBUG",
+                "handlers": ["console"],
+                "propagate": false
+            }
+        },
+        "root": {
+            "level"   : "DEBUG",
+            "handlers": ["console"]
+        }
+    }
+}
