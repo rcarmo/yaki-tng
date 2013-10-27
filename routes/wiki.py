@@ -31,9 +31,8 @@ def root():
 
 @route('/space/<page:path>')
 @timed
-@redis_cache(r)
+@redis_cache(r, 'markup')
 @view('wiki')
-#@redis_cache('markup')
 @render()
 def wiki(page):
     s = Store(path_for(settings.content.path))

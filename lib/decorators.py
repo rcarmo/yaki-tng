@@ -20,7 +20,7 @@ log = logging.getLogger()
 gmt_format_string = "%a, %d %b %Y %H:%M:%S GMT"
 
 
-def redis_cache(redis, ttl=3600):
+def redis_cache(redis, prefix='url', ttl=3600):
     """Cache route results in Redis"""
 
     def decorator(callback):
@@ -39,7 +39,9 @@ def redis_cache(redis, ttl=3600):
                     'headers': dict(response.headers),
                     'mtime': int(time.time())
                 }
-                redis.set('url:%s' % request.urlparts.path, json.dumps(item))
+                k = '%s:%s' % (prefix, request.urlparts.path)
+                redis.set(k, json.dumps(item))
+                #redis.expire(k, ttl)
             return body
         return wrapper
     return decorator
