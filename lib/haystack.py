@@ -43,18 +43,18 @@ class Haystack(dict):
         try:
             os.makedirs(self.path)
         except Exception, e:
-            log.error("Error on makedirs(%s): %s" % (self.path, e))
+            log.warn("Error on makedirs(%s): %s" % (self.path, e))
             pass
         try:
             cache = open(self.cache,"rb")
         except Exception, e:
-            log.error("Error while opening %s for reading: %s" % (self.cache, e))
+            log.warn("Error while opening %s for reading: %s" % (self.cache, e))
             cache = open(self.cache,"ab")
         cache.close()
         try:
             self._index = pickle.loads(open(self.index,"rb").read())
         except Exception, e:
-            log.error("index retrieval from disk failed: %s" % e)
+            log.warn("index retrieval from disk failed: %s" % e)
             self._index = {} # "key": [mtime,length,offset]
         self.created = self.modified = self.compacted = self.committed = time.time()
         log.debug("Rebuild complete, %d items." % len(self._index.keys()))
@@ -76,12 +76,12 @@ class Haystack(dict):
         try:
             os.unlink(self.index)
         except OSError, e:
-            log.error("Could not unlink %s: %s" % (self.index, e))
+            log.warn("Could not unlink %s: %s" % (self.index, e))
             pass
         try:
             os.unlink(self.cache)
         except OSError, e:
-            log.error("Could not unlink %s: %s" % (self.index, e))
+            log.warn("Could not unlink %s: %s" % (self.index, e))
             pass
         self.mutex.release()
         self._rebuild()
@@ -167,7 +167,7 @@ class Haystack(dict):
             cache.close()
             self.mutex.release()
         except Exception, e:
-            log.error("Error while storing %s: %s" % (key, e))
+            log.warn("Error while storing %s: %s" % (key, e))
             self.mutex.release()
             raise IOError
     
@@ -181,7 +181,7 @@ class Haystack(dict):
             del self._index[key]
             self.mutex.release()    
         except Exception, e:
-            log.error("Error while deleting %s: %s" % (key, e))
+            log.warn("Error while deleting %s: %s" % (key, e))
             self.mutex.release()    
             raise KeyError
   
@@ -205,7 +205,7 @@ class Haystack(dict):
             item = pickle.loads(buffer)
             self.mutex.release()
         except Exception, e:
-            log.error("Error while retrieving %s: %s" % (key, e))
+            log.debug("Error while retrieving %s: %s" % (key, e))
             self.mutex.release()
             raise KeyError  
         finally:
