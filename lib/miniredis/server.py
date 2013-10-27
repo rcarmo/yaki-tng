@@ -9,6 +9,7 @@ License: MIT (see LICENSE.md for details)
 
 from __future__ import with_statement
 from collections import deque
+from random import sample
 import os, sys, time, logging
 import socket, select, thread, errno
 
