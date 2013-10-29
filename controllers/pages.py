@@ -7,15 +7,15 @@ Created by Rui Carmo on 2007-02-19.
 Published under the MIT license.
 """
 
-import os, errno, time, gc, difflib, urllib, urlparse
-import logging
-from collections import defaultdict
+import os, sys, logging
 
 log = logging.getLogger()
 
 from yaki import Store
 from config import settings
+from miniredis.client import RedisClient
 
-class Controller:
+class Controller(object:
     def __init__(settings=settings):
-    	
+    	self.redis = RedisClient(settings.redis.bind_address, settings.redis.port)
+    	self.store = Store(settings.content.path)

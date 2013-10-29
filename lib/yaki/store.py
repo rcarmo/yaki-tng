@@ -56,7 +56,6 @@ def parse_page(buffer, mime_type='text/plain'):
             raise TypeError, "Invalid page file format."
     return headers, markup, mime_type
 
-
 class Store:
     """Wiki Store - abstracts file storage"""
 
