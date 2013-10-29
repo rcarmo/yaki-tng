@@ -11,7 +11,14 @@
         "bind_address": "127.0.0.1",
         "port": 6379,
         "storage": { 
-            "path": "/tmp" 
+            "path": "/tmp/redis" 
+        }
+    },
+    "indexer": {
+        "bind_address": "127.0.0.1",
+        "port": 8983,
+        "storage": {
+            "path": "/tmp/index"
         }
     },
     "content": {

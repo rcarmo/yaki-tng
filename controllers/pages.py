@@ -15,3 +15,7 @@ log = logging.getLogger()
 
 from yaki import Store
 from config import settings
+
+class Controller:
+    def __init__(settings=settings):
+    	
