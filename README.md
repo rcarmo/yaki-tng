@@ -39,6 +39,8 @@ All of these are, of course, applied within reason.
 
 # Dev Notes
 
+Yaki now requires Redis (since it's the only sensible way to share state among worker processes and saves a _lot_ of time in metadata housekeeping). A "mini" Redis server is included in the source tree, but it's a work in progress and only useful for basic testing. 
+
 Before starting work, make sure you run:
 
     python tools/msgfmt.py lib/yaki/locale/en/LC_MESSAGES/yaki.po

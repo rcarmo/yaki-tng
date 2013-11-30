@@ -27,7 +27,7 @@ if __name__ == "__main__":
         else:
             log.debug("Child spawned.")
 
-    # Launch our bundled Redis server
+    # Launch our bundled Redis server if there isn't one running already
     if settings.miniredis and "BOTTLE_CHILD" not in os.environ:
         try:
             client = miniredis.client.RedisClient()
