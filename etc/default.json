@@ -22,8 +22,15 @@
         }
     },
     "content": {
-        "path":  "data/main",
-        "homepage": "/space/HomePage"
+        "path":  "data/main"
+    },
+    "wiki": {
+        "#"       : "Paths",
+        "base"    : "/space",
+        "home"    : "start",
+        "media"   : "/media",
+        "plugins": {
+        }
     },
     "logging": {
         "version": 1,
