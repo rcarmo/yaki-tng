@@ -2,8 +2,7 @@
  * Syntax highlight formatting used by pygments
  */
  pre, .syntax { 
-    font-family: Menlo, Consolas, "Lucida Console", "Courier New", Courier, monospace;
-    font-size: 0.9em;
+    font-family: monospace;
     background: #f0f0f0;
     padding: 4px;
     overflow: hidden; 
