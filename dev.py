@@ -21,6 +21,9 @@ log = logging.getLogger()
 
 if __name__ == "__main__":
 
+    if settings.theme:
+        bottle.TEMPLATE_PATH = [os.path.join("themes", settings.theme, "views")]
+
     if settings.reloader:
         if "BOTTLE_CHILD" not in os.environ:
             log.debug("Using reloader, spawning first child.")

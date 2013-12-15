@@ -21,6 +21,7 @@
             "path": "/tmp/index"
         }
     },
+    "theme"  : "ink",
     "content": {
         "path":  "data/main"
     },
