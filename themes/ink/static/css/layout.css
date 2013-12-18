@@ -1,0 +1,35 @@
+* {
+    text-rendering: optimizeLegibility;
+}
+#topbar { 
+    background: #4C9220;
+    text-transform: uppercase;
+    font-weight: 500;
+    font-family: "Roboto Slab", "Roboto", sans-serif;
+} 
+button#menu-toggle { 
+    background:#370; 
+    border: none;
+    outline: 1px solid #250; 
+    position: absolute; 
+    top: .5em; right: 0px; 
+    padding: 4;
+    font-height: 24px;
+    color: white;
+}
+h1, h2, h3, h4 {
+    font-family: "Roboto Slab";
+    font-weight: normal;
+}
+
+code {
+    background: #efe;
+}
+
+blockquote {
+    font-family: "Roboto Slab";
+    font-weight: normal;
+    background: #eee;
+    padding: 0.5em;
+    font-size: 0.9em;
+}

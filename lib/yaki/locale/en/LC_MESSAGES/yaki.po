@@ -1,0 +1,349 @@
+# pathnames
+msgid "timed_path"
+msgstr "0000/00/00/0000"
+
+msgid "latest_blog"
+msgstr "^(blog)\/(\d+){4}\/(\d+){2}\/(\d+){2}.*"
+
+msgid "latest_link"
+msgstr "^(links)\/(\d+){4}\/(\d+){2}\/(\d+){2}.*"
+
+# page components
+msgid "pagetrail"
+msgstr "Page Trail"
+
+msgid "seealso"
+msgstr "See Also"
+
+msgid "indexing_message"
+msgstr "Indexing in progress, search and cross-references will be enabled soon."
+
+# link descriptions
+msgid "readmore"
+msgstr "Read More"
+
+msgid "external_link_format"
+msgstr "external link to %s"
+
+msgid "permalink_description"
+msgstr "permanent link to this entry"
+
+msgid "link_anchor_format"
+msgstr "link to %s in this page"
+
+msgid "link_defined_notindexed_format"
+msgstr "%s is defined, but has not been indexed yet."
+
+msgid "link_interwiki_format"
+msgstr "link to %s on another Wiki"
+
+msgid "link_undefined_format"
+msgstr "%s is not defined yet"
+
+msgid "link_update_format"
+msgstr "%s was updated %s ago"
+
+msgid "created_on_format"
+msgstr "Created on %s by %s"
+
+# Message Formatting
+msgid "warning_message_format"
+msgstr "<div class=\"warning\">%s</div>"
+
+# Plugins
+msgid "index_prefix_regex"
+msgstr "The|A|O|An|My|On|On The"
+
+msgid "journal_date_format"
+msgstr "%(month)s %(mday)s<sup>%(suffix)s</sup>"
+
+msgid "updated_ago_format"
+msgstr "%s ago"
+
+msgid "visited_ago_format"
+msgstr "visited %s ago"
+
+msgid "not_updated"
+msgstr "not updated since"
+
+msgid "never"
+msgstr "never"
+
+msgid "some_time"
+msgstr "some time"
+
+msgid "less_1min"
+msgstr "less than one minute"
+
+msgid "dawn"
+msgstr "Dawn"
+
+msgid "breakfast"
+msgstr "Breakfast"
+
+msgid "morning"
+msgstr "Morning"
+
+msgid "lunchtime"
+msgstr "Lunchtime"
+
+msgid "afternoon"
+msgstr "Afternoon"
+
+msgid "lateafternoon"
+msgstr "Late Afternoon"
+
+msgid "teatime"
+msgstr "Teatime"
+
+msgid "evening"
+msgstr "Evening"
+
+msgid "dinnertime"
+msgstr "Dinnertime"
+
+msgid "night"
+msgstr "Night"
+
+msgid "latenight"
+msgstr "Late Night"
+
+msgid "weehours"
+msgstr "In the wee hours"
+
+msgid "no_search"
+msgstr "No search performed"
+
+msgid "no_title_search_results"
+msgstr "No matching page titles for"
+
+msgid "no_results"
+msgstr "No results found for"
+
+msgid "search_disabled"
+msgstr "Content has not been indexed yet, search is temporarily disabled."
+
+msgid "search_results"
+msgstr "Search results for"
+
+msgid "title_search_results"
+msgstr "Page titles similar to"
+
+msgid "search_instructions"
+msgstr "You can use arbitrarily nested Boolean expressions with AND, OR, NOT, etc. \"quoted sentences\" for exact matches, search inside a field like title: or tags: or even do combined field and wildcard notation such as date:201103* "
+
+msgid "quicklook_click_to_zoom"
+msgstr "Click on the image to zoom in"
+
+msgid "error_include_file"
+msgstr "Plugin error: include file failed"
+
+msgid "error_markup_type"
+msgstr "Cannot process markup"
+
+msgid "error_reference_format"
+msgstr "Markup error: \"cid:\" schema missing from file reference"
+
+msgid "error_plugin_attr"
+msgstr "Plugin error: supplied attributes not in correct format"
+
+# RSS
+msgid "rss_comments_allowed"
+msgstr "(comments allowed)"
+
+msgid "rss_update_date_format"
+msgstr "%(weekday)s, %(month)s %(mday)s<sup>%(suffix)s</sup> %(year)s"
+
+# Words
+msgid "Day"
+msgstr "Day"
+
+msgid "Page"
+msgstr "Page"
+
+msgid "Entries"
+msgstr "Entries"
+
+msgid "Created"
+msgstr "Created"
+
+msgid "Modified"
+msgstr "Modified"
+
+msgid "Updated"
+msgstr "Updated"
+
+msgid "Referrers"
+msgstr "Referrers"
+
+msgid "Hits"
+msgstr "Hits"
+
+msgid "Item"
+msgstr "Item"
+
+msgid "References"
+msgstr "References"
+
+msgid "Missing References"
+msgstr "Missing References"
+
+msgid "List"
+msgstr "List"
+
+msgid "Go"
+msgstr "Go"
+
+msgid "By"
+msgstr "By"
+
+msgid "Title"
+msgstr "Title"
+
+msgid "Tags"
+msgstr "Tags"
+
+msgid "Tagged"
+msgstr "Tagged"
+
+# Time
+msgid "day"
+msgstr "day"
+
+msgid "days"
+msgstr "days"
+
+msgid "week"
+msgstr "week"
+
+msgid "weeks"
+msgstr "weeks"
+
+msgid "year"
+msgstr "year"
+
+msgid "years"
+msgstr "years"
+
+msgid "month"
+msgstr "month"
+
+msgid "months"
+msgstr "months"
+
+msgid "hour"
+msgstr "hour"
+
+msgid "hours"
+msgstr "hours"
+
+msgid "minute"
+msgstr "minute"
+
+msgid "minutes"
+msgstr "minutes"
+
+msgid "second"
+msgstr "second"
+
+msgid "seconds"
+msgstr "seconds"
+
+# Short month names
+msgid "Jan"
+msgstr "Jan"
+
+msgid "Feb"
+msgstr "Feb"
+
+msgid "Mar"
+msgstr "Mar"
+
+msgid "Apr"
+msgstr "Apr"
+
+msgid "May"
+msgstr "May"
+
+msgid "Jun"
+msgstr "Jun"
+
+msgid "Jul"
+msgstr "Jul"
+
+msgid "Aug"
+msgstr "Aug"
+
+msgid "Sep"
+msgstr "Sep"
+
+msgid "Oct"
+msgstr "Oct"
+
+msgid "Nov"
+msgstr "Nov"
+
+msgid "Dec"
+msgstr "Dec"
+
+# Months
+msgid "January"
+msgstr "January"
+
+msgid "February"
+msgstr "February"
+
+msgid "March"
+msgstr "March"
+
+msgid "April"
+msgstr "April"
+
+msgid "May"
+msgstr "May"
+
+msgid "June"
+msgstr "June"
+
+msgid "July"
+msgstr "July"
+
+msgid "August"
+msgstr "August"
+
+msgid "September"
+msgstr "September"
+
+msgid "October"
+msgstr "October"
+
+msgid "November"
+msgstr "November"
+
+msgid "December"
+msgstr "December"
+
+# Weekdays
+msgid "Monday"
+msgstr "Monday"
+
+msgid "Tuesday"
+msgstr "Tuesday"
+
+msgid "Wednesday"
+msgstr "Wednesday"
+
+msgid "Thursday"
+msgstr "Thursday"
+
+msgid "Friday"
+msgstr "Friday"
+
+msgid "Saturday"
+msgstr "Saturday"
+
+msgid "Sunday"
+msgstr "Sunday"
+
+msgid "translation_applied"
+msgstr "English translations applied"
