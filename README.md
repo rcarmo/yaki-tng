@@ -31,17 +31,38 @@ A modern, revamped implementation of [Yaki][y].
 Yaki has always been designed around three simple rules:
 
 * Pure Python
-* No external dependencies - _everything_ is included
+* No external dependencies - everything _ought_ to be included
 * No databases
 
 All of these are, of course, applied within reason.
+
+Regrettably, and due to the various licensing requirements and the need to push development forward, most third-party dependencies were removed.
+
+Yaki now provides an explicit `requirements.txt` file that makes it easy to install everything else you need, and a `Vagrantfile` to easily reproduce the development environment anywhere.
 
 
 # Dev Notes
 
 Yaki now requires Redis (since it's the only sensible way to share state among worker processes and saves a _lot_ of time in metadata housekeeping). A "mini" Redis server is included in the source tree, but it's a work in progress and only useful for basic testing. 
 
-Before starting work, make sure you run:
+## Using Vagrant
+
+The `Vagrantfile` that ships with Yaki assumes an Ubuntu (precise64) target, but should work fine with most modern Debian-based distros. At the time of this writing, it works with Vagrant 1.4 and the `vagrant-lxc` plugin, and sets up the following for you:
+
+* Redis
+* `mkvirtualenv` and a supporting `virtualenv` containing:
+  * Celery
+  * uWSGI
+  * Whoosh
+  * All the other miscellaneous dependencies listed in `requirements.txt`
+
+If you decide to use `vagrant-lxc`, you can fetch a compatible box [from here](https://github.com/fgrehm/vagrant-lxc/wiki/Base-boxes#available-boxes).
+
+## Coding
+
+If you use the provided `Vagrantfile`, make sure you start your session with `workon yaki` to use the `virtualenv` it builds.
+
+Before starting the development daemon, make sure you run:
 
     python tools/msgfmt.py lib/yaki/locale/en/LC_MESSAGES/yaki.po
     
