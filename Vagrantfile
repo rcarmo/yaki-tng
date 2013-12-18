@@ -7,6 +7,7 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "precise64"
 
+  config.vm.network :forwarded_port, guest: 8000, host: 8000, host_ip: '0.0.0.0'
   config.vm.provision :shell, :inline => <<END
 # Check if we need to perform a weekly upgrade - this also triggers initial provisioning
 touch -d '-1 week' /tmp/.limit
