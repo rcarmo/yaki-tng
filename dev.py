@@ -14,7 +14,6 @@ import os, sys, json, logging, logging.config
 sys.path.insert(0,os.path.join(os.path.dirname(os.path.abspath(__file__)),'lib'))
 
 import utils, bottle
-import miniredis.client, miniredis.server
 from config import settings
 
 log = logging.getLogger()
@@ -29,15 +28,6 @@ if __name__ == "__main__":
             log.debug("Using reloader, spawning first child.")
         else:
             log.debug("Child spawned.")
-
-    # Launch our bundled Redis server if there isn't one running already
-    if settings.miniredis and "BOTTLE_CHILD" not in os.environ:
-        try:
-            client = miniredis.client.RedisClient()
-            log.debug("Connected to Redis")
-        except Exception, e:
-            log.debug("Spawning Redis")
-            miniredis.server.fork(settings.redis)
 
     # Bind routes
     if not settings.reloader or ("BOTTLE_CHILD" in os.environ):

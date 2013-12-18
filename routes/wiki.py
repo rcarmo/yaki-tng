@@ -18,9 +18,9 @@ from yaki.decorators import render
 
 from decorators import timed, redis_cache, cache_control
 
-from miniredis.client import RedisClient
+from redis import StrictRedis as Redis
 
-r = RedisClient()
+r = Redis()
 
 @route('/')
 @route(settings.wiki.base)

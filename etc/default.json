@@ -1,18 +1,10 @@
 {
     "debug": true,
     "reloader": true,
-    "miniredis": true,
     "environment": "dev",
     "http": {
         "bind_address": "127.0.0.1",
         "port": 8000
-    },
-    "redis": {
-        "bind_address": "127.0.0.1",
-        "port": 6379,
-        "storage": { 
-            "path": "/tmp/redis" 
-        }
     },
     "indexer": {
         "bind_address": "127.0.0.1",

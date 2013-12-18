@@ -7,6 +7,8 @@ Title: Documentation
 
 Under this tree you'll find (in progress) documentation:
 
+* Installation
+* Configuration
 * [Themeing](./yaki/Themeing)
 
 [p]: Tao:dev/Python
