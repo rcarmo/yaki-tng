@@ -7,7 +7,7 @@ A modern, revamped implementation of [Yaki][y].
 
 * Move to a standard WSGI app model, using [Bottle][b] as both routing and templating engine
 * Streamline the markup rendering pipeline
-* Move all the cache management to an external process (Redis, Memcache, etc. - your choice)
+* Move all the cache management to an external process (Redis)
 * Split the indexer from the main body of code
 * Get it running at insanely high speeds inside `uWSGI+gevent` or `Gunicorn+gevent` (and PyPy)
 
