@@ -7,7 +7,11 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "precise64"
 
+  # Forward a port to the development server
   config.vm.network :forwarded_port, guest: 8000, host: 8000, host_ip: '0.0.0.0'
+
+
+  # Provision packages -- if you change this after creating the VM, just do "vagrant provision" to run it again
   config.vm.provision :shell, :inline => <<END
 # Check if we need to perform a weekly upgrade - this also triggers initial provisioning
 touch -d '-1 week' /tmp/.limit

@@ -5,3 +5,4 @@ Title: Tests
 * [Aliases](./aliases)
 * [InterWiki Map](./interwiki)
 * [Syntax Highlighting](./highlight)
+* [Inline Images](./img)
