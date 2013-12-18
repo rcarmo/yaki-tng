@@ -8,7 +8,6 @@ License: MIT (see LICENSE.md for details)
 """
 
 import os, sys, time, math, re, logging
-from markup.feedparser import _parse_date
 import gettext
 gettext.textdomain('date')
 _ = gettext.gettext
@@ -26,8 +25,13 @@ def parse_date(date):
     """Parse a TextMate date (YYYY-MM-DD HH:MM:SS, no time zone, assume it's always localtime)"""
 
     m = _textmate_date_re.match(date)
-    if not m:
-        return time.mktime(_parse_date(date))
+    try:
+        from feedparser import _parse_date
+        if not m:
+            return time.mktime(_parse_date(date))
+    except:
+        pass
+
     return time.mktime(time.localtime(calendar.timegm(time.gmtime(time.mktime(time.strptime(date,
                        '%Y-%m-%d %H:%M:%S'))))))
 
