@@ -97,7 +97,7 @@ class Store:
 
     def mtime(self, pagename):
         """Retrieve modification time for the current revision of a given page by checking the folder modification time.
-        Assumes underlying OS/FS knows how to properly update mtime on a folder."""
+           Assumes underlying OS/FS knows how to properly update mtime on a folder."""
 
         targetpath = self.get_path(pagename)
         if(os.path.exists(targetpath)):

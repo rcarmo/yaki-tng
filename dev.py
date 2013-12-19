@@ -8,7 +8,7 @@ Created by: Rui Carmo
 License: MIT (see LICENSE.md for details)
 """
 
-import os, sys, json, logging, logging.config
+import os, sys, json, logging
 
 # Make sure our bundled libraries take precedence
 sys.path.insert(0,os.path.join(os.path.dirname(os.path.abspath(__file__)),'lib'))
@@ -20,8 +20,7 @@ log = logging.getLogger()
 
 if __name__ == "__main__":
 
-    if settings.theme:
-        bottle.TEMPLATE_PATH = [os.path.join("themes", settings.theme, "views")]
+    bottle.TEMPLATE_PATH = [os.path.join("themes", settings.theme, "views")]
 
     if settings.reloader:
         if "BOTTLE_CHILD" not in os.environ:
@@ -36,8 +35,8 @@ if __name__ == "__main__":
         log.info("Serving requests.")
 
     bottle.run(
-        port     = settings.http.port, 
-        host     = settings.http.bind_address, 
+        port     = settings.http.port,
+        host     = settings.http.bind_address,
         debug    = settings.debug,
         reloader = settings.reloader
     )

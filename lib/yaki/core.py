@@ -13,10 +13,14 @@ log = logging.getLogger()
 
 
 def sanitize_title(title):
-  return re.sub("[\W+]","-",title.lower())
+    """Generate a usable anchor from a title string"""
+
+    return re.sub("[\W+]","-",title.lower())
 
 
 def render_markup(raw, markup=u'text/html'):
+    """Turn markup into nice HTML"""
+
     # Allow module to load regardless of textile or markdown support
     try:
         import textile
@@ -36,7 +40,7 @@ def render_markup(raw, markup=u'text/html'):
 
     def _html(raw):
         return raw
-    
+
     log.debug(markup)
 
     return {
@@ -47,4 +51,4 @@ def render_markup(raw, markup=u'text/html'):
         u'text/textile'       : _textile,
         u'text/x-textile'     : _textile,
         u'text/html'          : _html}[markup](raw)
-        
+
