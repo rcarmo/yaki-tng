@@ -42,6 +42,8 @@ IGNORED_FOLDERS = ['CVS', '.hg', '.svn', '.git', '.AppleDouble']
 
 
 def parse_page(buffer, mime_type='text/plain'):
+    """Helper function for parsing page metadata out of a plaintext buffer"""
+
     headers = {}
     markup  = ''
     if mime_type in ['text/plain', 'text/x-textile', 'text/x-markdown']:
@@ -56,6 +58,7 @@ def parse_page(buffer, mime_type='text/plain'):
             raise TypeError, "Invalid page file format."
     return headers, markup, mime_type
 
+
 class Store:
     """Wiki Store - abstracts file storage"""
 
@@ -68,13 +71,13 @@ class Store:
         self.pages   = {}
         self.aliases = {}
         self.dates   = {}
-        
+
 
     def get_path(self,pagename):
         """Append the store path to the pagename"""
 
         return os.path.join(self.path, pagename)
-    
+
 
     def date(self, pagename):
         """Retrieve a page's stored date (or fall back to mtime)"""
@@ -87,6 +90,7 @@ class Store:
 
     def exists(self, pagename):
         """Verifies if a given page/path exists"""
+
         targetpath = self.get_path(pagename)
         return(os.path.exists(targetpath))
 
@@ -100,7 +104,7 @@ class Store:
             return os.stat(targetpath)[stat.ST_MTIME]
         return None
 
-    
+
     def get_attachments(self, pagename, pattern = '*'):
         """Get attachments for a given page"""
 
@@ -109,7 +113,7 @@ class Store:
         attachments = map(os.path.basename,filter(lambda x: not os.path.isdir(x), attachments))
         return attachments
 
-                
+
     def is_attachment(self, pagename, attachment):
         """Checks if a given filename is attached to a page"""
 
@@ -130,7 +134,7 @@ class Store:
         targetfile = os.path.join(targetpath,attachment)
         return targetfile
 
-    
+
     def get_page(self, pagename, revision = None):
         """Retrieve the specified page"""
 
@@ -147,12 +151,12 @@ class Store:
                 buffer = h.read()
                 h.close()
                 headers, markup, mime_type = parse_page(buffer,BASE_TYPES[base.split('.',1)[1]])
-    
+
                 # If the page has no title header, use the path name
                 if 'title' not in headers.keys():
                     headers['title'] = pagename
                 headers['name'] = pagename
-                
+
                 # Now try to supply a sensible set of dates
                 try:
                     # try parsing the date header
@@ -175,7 +179,7 @@ class Store:
         else:
              raise IOError, "Couldn't find page %s." % (pagename)
         return None
-    
+
 
     def get_all_pages(self):
         """Enumerate all pages and their last modification time"""
@@ -199,12 +203,12 @@ class Store:
                 if len(self.aliases[base]) > len(name):
                     self.aliases[base] = name
             else:
-                self.aliases[base] = name        
+                self.aliases[base] = name
             for replacement in ALIASING_CHARS:
                 alias = name.lower().replace(' ',replacement)
                 self.aliases[alias] = name
         return self.pages
-    
+
 
     def update_page(self, pagename, fields, base = "index.txt"):
         """Updates a given page, inserting a neutral text file by default"""
@@ -212,13 +216,13 @@ class Store:
         targetpath = self.getPath(pagename)
         if(not os.path.exists(targetpath)):
             os.makedirs(targetpath)
-        filename = os.path.join(targetpath,base) 
+        filename = os.path.join(targetpath,base)
         try:
             open(filename, "wb").write((BASE_PAGE % fields).encode('utf-8'))
         except IOError:
             return None
         return True
-    
+
 
     def add_attachment(self, pagename, filename, newbasename = None):
         """Add attachment to a page"""
