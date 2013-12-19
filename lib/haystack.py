@@ -27,16 +27,16 @@ class Haystack(dict):
         super(Haystack,self).__init__()
         self.enabled = True
         self.mutex = thread.allocate_lock()
-        self.commitinterval = commit
+        self.commitinterval  = commit
         self.compactinterval = compact
         self.path = path
         self.basename = basename
         self.cache = os.path.join(self.path,self.basename + '.bin')
         self.index = os.path.join(self.path,self.basename + '.idx')
-        self.temp = os.path.join(self.path,self.basename + '.tmp')   
+        self.temp  = os.path.join(self.path,self.basename + '.tmp')
         self._rebuild()
         self.created = self.modified = self.compacted = self.committed = time.time()
-  
+
 
     def _rebuild(self):
         self.mutex.acquire()
@@ -59,7 +59,7 @@ class Haystack(dict):
         self.created = self.modified = self.compacted = self.committed = time.time()
         log.debug("Rebuild complete, %d items." % len(self._index.keys()))
         self.mutex.release()
-  
+
 
     def commit(self):
         if not self.enabled:
@@ -93,38 +93,39 @@ class Haystack(dict):
             self.commit()
         if now > (self.compacted + self.compactinterval):
             self._compact()
-    
+
 
     def __eq__(self,other):
         raise TypeError('Equality undefined for this kind of dictionary')
-  
+
 
     def __ne__(self,other):
         raise TypeError('Equality undefined for this kind of dictionary')
-  
+
 
     def __lt__(self,other):
         raise TypeError('Comparison undefined for this kind of dictionary')
-  
+
 
     def __le__(self,other):
         raise TypeError('Comparison undefined for this kind of dictionary')
-  
+
 
     def __gt__(self,other):
         raise TypeError('Comparison undefined for this kind of dictionary')
-  
+
 
     def __ge__(self,other):
         raise TypeError('Comparison undefined for this kind of dictionary')
-  
+
 
     def __repr__(self,other):
         raise TypeError('Comparison undefined for this kind of dictionary')
-  
+
 
     def expire(self,when):
         """Remove from cache any items older than a specified time"""
+
         if not self.enabled: return
         self.mutex.acquire()
         for k in self._index.keys():
@@ -132,11 +133,11 @@ class Haystack(dict):
                 del self._index[k]
         self.mutex.release()
         self._cleanup()
-  
+
 
     def keys(self):
         return self._index.keys()
-      
+
 
     def stats(self,key):
         if not self.enabled:
@@ -149,10 +150,11 @@ class Haystack(dict):
         except KeyError:
             self.mutex.release()
             raise KeyError
-  
+
 
     def __setitem__(self,key,val):
         """Store an item in the cache - errors will cause the entire cache to be rebuilt"""
+
         if not self.enabled:
             return
         self.mutex.acquire()
@@ -170,31 +172,35 @@ class Haystack(dict):
             log.warn("Error while storing %s: %s" % (key, e))
             self.mutex.release()
             raise IOError
-    
+
 
     def __delitem__(self,key):
         """Remove item from cache - in practice, we only remove it from the index"""
+
         if not self.enabled:
             return
         self.mutex.acquire()
         try:
             del self._index[key]
-            self.mutex.release()    
+            self.mutex.release()
         except Exception, e:
             log.warn("Error while deleting %s: %s" % (key, e))
-            self.mutex.release()    
+            self.mutex.release()
             raise KeyError
-  
 
-    def get(self,key,default):
+
+    def get(self, key, default):
+        """Retrieve item"""
+
         try:
             return self.__getitem__(key)
         except KeyError:
             return default
 
 
-    def __getitem__(self,key):
+    def __getitem__(self, key):
         """Retrieve item"""
+
         if not self.enabled:
             raise KeyError
         self.mutex.acquire()
@@ -207,14 +213,15 @@ class Haystack(dict):
         except Exception, e:
             log.debug("Error while retrieving %s: %s" % (key, e))
             self.mutex.release()
-            raise KeyError  
+            raise KeyError
         finally:
             cache.close()
         return item
-  
 
-    def mtime(self,key):
+
+    def mtime(self, key):
         """Return the creation/modification time of a cache item"""
+
         if not self.enabled:
             raise KeyError
         self.mutex.acquire()
@@ -226,10 +233,11 @@ class Haystack(dict):
             log.debug("Error while getting modification time for %s: %s" % (key, e))
             self.mutex.release()
             raise KeyError
-        
+
 
     def _compact(self):
         """Compact the cache"""
+
         self.mutex.acquire()
         cache = open(self.cache,"rb")
         compacted = open(self.temp,"ab")
