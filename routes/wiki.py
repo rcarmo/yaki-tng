@@ -32,7 +32,8 @@ def root():
 @route(settings.wiki.base + '/<page:path>')
 @timed
 @cache_results(settings.cache.worker_timeout)
-@redis_cache(r, 'markup', settings.cache.redis_timeout)
+@redis_cache(r, 'html', settings.cache.redis_timeout)
+@cache_control(settings.cache.cache_control)
 @view('wiki')
 @render()
 def wiki(page):
@@ -49,6 +50,7 @@ def wiki(page):
 
 @route(settings.wiki.media + '/<item:path>')
 @timed
+@cache_control(settings.cache.cache_control)
 def media_asset(item):
     """Return page attachments"""
 
