@@ -49,7 +49,7 @@ class ColorFormatter(logging.Formatter) :
     };
 
     def format(self, record):
-        if '256color' in os.environ.get('TERM', ''):
+        if 'color' in os.environ.get('TERM', ''):
             if(self._colors.has_key(record.levelname)):
                 record.levelname = "%s%s\033[0;0m" % (self._colors[record.levelname],  record.levelname)
             record.msg = "\033[37m\033[1m%s\033[0;0m" % record.msg

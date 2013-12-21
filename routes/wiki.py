@@ -49,7 +49,6 @@ def wiki(page):
 @route(settings.wiki.media + '/<item:path>')
 @timed
 def media_asset(item):
-    """Return page attachments -- by default, we assume the raw markup is also up for grabs, although this may change later"""
+    """Return page attachments"""
 
-    s = Store(path_for(settings.content.path))
-    return static_file(item, root=s.get_path(settings.content.path))
+    return static_file(item, root=path_for(settings.content.path))
