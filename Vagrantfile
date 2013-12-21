@@ -23,6 +23,7 @@ if [ /tmp/.limit -nt /var/cache/apt/pkgcache.bin ]; then
     apt-get -y update
     apt-get -y dist-upgrade
     apt-get -y install htop tmux vim rsync 
+    apt-get -y install libpcre3-dev
 fi
 rm /tmp/.limit
 
