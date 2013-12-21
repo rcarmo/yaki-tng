@@ -7,13 +7,11 @@ Created by: Rui Carmo
 """
 
 from bottle import request, response, route, abort
-import time, binascii, hashlib, email.utils, functools
+import time, binascii, hashlib, email.utils, functools, json
 import logging
+from utils import tb
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
+from redis import StrictRedis as Redis
 
 log = logging.getLogger()
 
@@ -23,16 +21,19 @@ gmt_format_string = "%a, %d %b %Y %H:%M:%S GMT"
 def redis_cache(redis, prefix='url', ttl=3600):
     """Cache route results in Redis"""
 
+    r = Redis()
+
     def decorator(callback):
         @functools.wraps(callback)
         def wrapper(*args, **kwargs):
             try:
-                item = json.loads(redis.get('url:%s' % request.urlparts.path))
+                item = json.loads(r.get('%s:%s' % (prefix,request.urlparts.path)))
                 body = item['body']
                 for h in item['headers']:
                     response.set_header(h, item['headers'][h])
                 response.set_header('X-Source', 'Redis')
-            except:
+            except Exception as e:
+                log.debug(tb())
                 body = callback(*args, **kwargs)
                 item = {
                     'body': body,
@@ -40,14 +41,14 @@ def redis_cache(redis, prefix='url', ttl=3600):
                     'mtime': int(time.time())
                 }
                 k = '%s:%s' % (prefix, request.urlparts.path)
-                redis.set(k, json.dumps(item))
-                redis.expire(k, ttl)
+                r.set(k, json.dumps(item))
+                r.expire(k, ttl)
             return body
         return wrapper
     return decorator
 
 
-def cache_results(timeout):
+def cache_results(timeout=0):
     """Cache route results for a given period of time"""
 
     def decorator(callback):

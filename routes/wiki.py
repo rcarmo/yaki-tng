@@ -16,7 +16,7 @@ from utils import path_for
 from yaki import Store
 from yaki.decorators import render
 
-from decorators import timed, redis_cache, cache_control
+from decorators import timed, redis_cache, cache_control, cache_results
 
 from redis import StrictRedis as Redis
 
@@ -31,7 +31,8 @@ def root():
 
 @route(settings.wiki.base + '/<page:path>')
 @timed
-@redis_cache(r, 'markup')
+@cache_results(settings.cache.worker_timeout)
+@redis_cache(r, 'markup', settings.cache.redis_timeout)
 @view('wiki')
 @render()
 def wiki(page):

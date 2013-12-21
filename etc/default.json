@@ -17,6 +17,12 @@
     "content": {
         "path":  "data/main"
     },
+    "cache": {
+        "#": "In-worker memory cache",
+        "worker_timeout": 60,
+        "#": "Redis cache timeout",
+        "redis_timeout": 300
+    },
     "wiki": {
         "#"       : "Paths",
         "base"    : "/space",
