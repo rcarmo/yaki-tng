@@ -3,17 +3,18 @@ yaki-tng
 
 A modern, revamped implementation of [Yaki][y].
 
-
 # Status
 
-Working, but very shy of the target feature set. I'm having to put this on ice yet again as I go back to 
+Working, but very shy of the target feature set. I'm having to put this on ice time and time again as other things impinge upon my time, but I manage to tinker a little now and then -- that stochastic approach is one of the reasons the `master` branch isn't very stable (I usually use `git-flow`, but in this case I'll only apply it here when I'm happy with the current refactoring).
+
+Right now, I'm refactoring this to conform to [my usual pattern][pp] and make sure there's a cleaner separation of concerns (but there's still a little too much magic in the `yaki` library and a couple of the decorators).
 
 ## Main goals
 
 * Move to a standard WSGI app model, using [Bottle][b] as both routing and templating engine - DONE
 * Streamline the markup rendering pipeline - DONE
 * Move all the cache management to an external process (Redis) - PARTIALLY DONE
-* Split the indexer from the main body of code - DONE
+* Split the indexer from the main body of code - DONE, CURRENTLY BROKEN
 * Get it running at insanely high speeds inside `uWSGI+gevent` or `Gunicorn+gevent` (and PyPy) - TEST ONLY
 
 ## Secondary Goals
@@ -29,7 +30,7 @@ Working, but very shy of the target feature set. I'm having to put this on ice y
 * Support for (Multi)Markdown, Textile, raw HTML, etc. - DONE
 * Flexible set of plugins - PARTIALLY DONE (some legacy plugins not ported over yet)
 * Pygments integration (for technical documentation) - DONE
-* Full-text indexing - PARTIALLY DONE (need to finish indexing daemon)
+* Full-text indexing - PARTIALLY DONE (need to finish refactoring the indexing daemon)
 
 ## Batteries included
 
@@ -41,7 +42,7 @@ Yaki has always been designed around three simple rules:
 
 All of these are, of course, applied within reason.
 
-Regrettably, and due to the various licensing requirements and the need to push development forward, most third-party dependencies were removed from the repository.
+Regrettably, due to the various licensing requirements and the need to push development forward, most third-party dependencies were removed from the repository.
 
 Yaki now provides an explicit `requirements.txt` file that makes it easy to install everything else you need, and a `Vagrantfile` to easily reproduce the development environment anywhere.
 
@@ -75,3 +76,4 @@ Before starting the development daemon, make sure you run:
 
 [b]: http://bottlepy.org
 [y]: https://github.com/rcarmo/yaki
+[pp]: http://the.taoofmac.com/space/blog/2013/08/11/2300
