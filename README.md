@@ -3,28 +3,33 @@ yaki-tng
 
 A modern, revamped implementation of [Yaki][y].
 
+
+# Status
+
+Working, but very shy of the target feature set. I'm having to put this on ice yet again as I go back to 
+
 ## Main goals
 
-* Move to a standard WSGI app model, using [Bottle][b] as both routing and templating engine
-* Streamline the markup rendering pipeline
-* Move all the cache management to an external process (Redis)
-* Split the indexer from the main body of code
-* Get it running at insanely high speeds inside `uWSGI+gevent` or `Gunicorn+gevent` (and PyPy)
+* Move to a standard WSGI app model, using [Bottle][b] as both routing and templating engine - DONE
+* Streamline the markup rendering pipeline - DONE
+* Move all the cache management to an external process (Redis) - PARTIALLY DONE
+* Split the indexer from the main body of code - DONE
+* Get it running at insanely high speeds inside `uWSGI+gevent` or `Gunicorn+gevent` (and PyPy) - TEST ONLY
 
 ## Secondary Goals
 
-* Refactor all the configuration to use JSON
-* Refactor all the inline logic according to MVC patterns
+* Refactor all the configuration to use JSON - DONE
+* Refactor all the inline logic according to MVC patterns - PARTIALLY DONE (missing some plugins)
 * Provide a set of APIs for gathering data
 * Increase resiliency (lower RAM footprint, better horizontal scaling, better fault tolerance, etc.)
 * Python 3 support (eventually, I'm actually aiming for PyPy)
 
 ## Target Feature Set
 
-* Support for (Multi)Markdown, Textile, raw HTML, etc.
-* Flexible set of plugins
-* Pygments integration (for technical documentation)
-* Full-text indexing
+* Support for (Multi)Markdown, Textile, raw HTML, etc. - DONE
+* Flexible set of plugins - PARTIALLY DONE (some legacy plugins not ported over yet)
+* Pygments integration (for technical documentation) - DONE
+* Full-text indexing - PARTIALLY DONE (need to finish indexing daemon)
 
 ## Batteries included
 
