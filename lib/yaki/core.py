@@ -30,12 +30,15 @@ def render_markup(raw, markup=u'text/html'):
         pass
 
     def _markdown(raw):
+        log.debug("Rendering Markdown")
         return markdown.Markdown(extensions=['extra','toc','smartypants','codehilite','meta','sane_lists'], safe_mode=False).convert(raw)
 
     def _plaintext(raw):
+        log.debug("Rendering plaintext")
         return u'<pre>\n%s</pre>' % raw
 
     def _textile(raw):
+        log.debug("Rendering Textile")
         return smartypants.smartyPants(textile.textile(unicode(raw), head_offset=0, validate=0, sanitize=1, encoding='utf-8', output='utf-8'))
 
     def _html(raw):

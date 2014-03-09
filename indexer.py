@@ -21,20 +21,17 @@ import bottle
 from config import settings
 from utils.jobs import task, start
 from yaki.store import Store
-from miniredis.client import RedisClient
+from redis import StrictRedis as Redis
 
 log = logging.getLogger()
 
 s = Store(settings.content.path)
-r = RedisClient(settings.redis.bind_address, settings.redis.port)
+r = Redis()
 
 @task
 def enumerate_pages():
     for p in s.get_all_pages():
-
-
-
-
+        print p
 
 
 

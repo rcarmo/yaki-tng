@@ -3,19 +3,25 @@
     "reloader": true,
     "environment": "dev",
     "http": {
+        "bind_address": "0.0.0.0",
+        "port": 8080
+    },
+    "redis": {
         "bind_address": "127.0.0.1",
-        "port": 8000
+        "port": 6379
     },
     "indexer": {
-        "bind_address": "127.0.0.1",
-        "port": 8983,
+        "http": {
+            "bind_address": "127.0.0.1",
+            "port": 8983
+        },
+        "reloader": true,
         "storage": {
             "path": "/tmp/index"
         }
     },
-    "theme"  : "ink",
     "content": {
-        "path":  "data/main"
+        "path": "data/main"
     },
     "cache": {
         "#": "In-worker memory cache",
@@ -25,13 +31,15 @@
         "#":"HTTP Cache control",
         "cache_control": 3600
     },
+    "theme": "ink",
     "wiki": {
         "#"       : "Paths",
         "base"    : "/space",
-        "home"    : "start",
+        "home"    : "HomePage",
         "media"   : "/media",
         "plugins": {
-        }
+        },
+        "markup_overrides": { "text/plain": "text/x-textile" }
     },
     "logging": {
         "version": 1,

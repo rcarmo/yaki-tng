@@ -12,33 +12,7 @@ Published under the MIT license.
 import os, sys, logging
 import stat, glob, codecs, shutil, rfc822
 from utils.core import Singleton
-
-BASE_TYPES={
-    "txt"     : "text/plain",
-    "html"    : "text/html",
-    "htm"     : "text/html",
-    "md"      : "text/x-markdown",
-    "mkd"     : "text/x-markdown",
-    "mkdn"    : "text/x-markdown",
-    "markdown": "text/x-markdown",
-    "textile" : "text/x-textile"
-}
-
-BASE_FILENAMES=["index.%s" % x for x in BASE_TYPES.keys()]
-BASE_PAGE = """From: %(author)s
-Date: %(date)s
-Content-Type: %(markup)s
-Content-Encoding: utf-8
-Title: %(title)s
-Keywords: %(keywords)s
-Categories: %(categories)s
-Tags: %(tags)s
-%(_headers)s
-
-%(content)s
-"""
-
-IGNORED_FOLDERS = ['CVS', '.hg', '.svn', '.git', '.AppleDouble']
+from .constants import *
 
 
 def parse_page(buffer, mime_type='text/plain'):
@@ -191,7 +165,7 @@ class Store:
                 if i in subfolders:
                     subfolders.remove(i)
             for base in BASE_FILENAMES:
-                if( base in files ):
+                if base in files:
                     # Check for modification date of markup file only
                     mtime = os.stat(os.path.join(folder,base))[stat.ST_MTIME]
                     # Add each path (removing the self.path prefix)
@@ -210,13 +184,20 @@ class Store:
         return self.pages
 
 
-    def update_page(self, pagename, fields, base = "index.txt"):
+    def update_page(self, pagename, fields, default = "index.txt"):
         """Updates a given page, inserting a neutral text file by default"""
 
-        targetpath = self.getPath(pagename)
-        if(not os.path.exists(targetpath)):
-            os.makedirs(targetpath)
-        filename = os.path.join(targetpath,base)
+        folder = self.getPath(pagename)
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+        else:
+            # check if there's already an index file
+            for base in BASE_FILENAMES:
+                if base in files:
+                    if os.path.exists(os.path.join(folder,base)):
+                        default = base
+
+        filename = os.path.join(targetpath,default)
         try:
             open(filename, "wb").write((BASE_PAGE % fields).encode('utf-8'))
         except IOError:

@@ -52,8 +52,8 @@ class Acronyms:
             try:
                 (acronym, expansion) = line.split(' ',1)
                 self.acronyms[acronym.lower()] = expansion
-            except ValueError: # skip lines with more than two fields
-                log.warn("skipping line '%s'" % line)
+            except ValueError: # skip blank lines or with more than two fields
+                log.debug("skipping line '%s'" % line)
                 pass
     
 

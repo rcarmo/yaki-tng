@@ -15,10 +15,6 @@ from .store import Store
 from .plugins import plugin, Registry
 from .core import render_markup
 
-# TODO: implement these
-
-from .mocks import Index
-
 # Initialize translations
 
 english = gettext.translation('yaki', os.path.join(os.path.dirname(__file__), 'locale'), languages=['en'])

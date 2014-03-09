@@ -53,7 +53,7 @@ class InterWiki:
                 (schema, url) = line.strip().split(' ',1)
                 self.schemas[schema.lower()] = h.unescape(url) #url.replace("&amp;","&")
             except ValueError:
-                log.warn("skipping line '%s'" % line)
+                log.debug("skipping line '%s'" % line)
                 pass
         self.mtime = time.time()
     

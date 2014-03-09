@@ -7,7 +7,7 @@ Description: Utility functions for retrieving process information
 License: MIT (see LICENSE.md for details)
 """
 
-import os, sys, logging, htmlentitydefs
+import os, sys, re, logging, htmlentitydefs
 
 log = logging.getLogger()
 
@@ -53,3 +53,6 @@ def convert_html(buffer):
     return re.sub(r'&(#?)(.+?);', convertentity, buffer)
 
 
+def munge_string(buffer):
+    """Builds anchor IDs"""
+    return re.sub("[\W+]", "-", buffer.lower())

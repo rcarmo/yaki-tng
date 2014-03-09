@@ -9,7 +9,7 @@ Python Standard Library.
 
 Homepage and documentation: http://bottlepy.org/
 
-Copyright (c) 2013, Marcel Hellkamp.
+Copyright (c) 2014, Marcel Hellkamp.
 License: MIT (see LICENSE for details)
 """
 
@@ -42,6 +42,8 @@ from datetime import date as datedate, datetime, timedelta
 from tempfile import TemporaryFile
 from traceback import format_exc, print_exc
 from inspect import getargspec
+from unicodedata import normalize
+
 
 try: from simplejson import dumps as json_dumps, loads as json_lds
 except ImportError: # pragma: no cover
@@ -416,7 +418,10 @@ class Router(object):
         verb = environ['REQUEST_METHOD'].upper()
         path = environ['PATH_INFO'] or '/'
         target = None
-        methods = [verb, 'GET', 'ANY'] if verb == 'HEAD' else [verb, 'ANY']
+        if verb == 'HEAD':
+            methods = ['PROXY', verb, 'GET', 'ANY']
+        else:
+            methods = ['PROXY', verb, 'ANY']
 
         for method in methods:
             if method in self.static and path in self.static[method]:
@@ -535,7 +540,7 @@ class Route(object):
             to recover the original function before inspection. '''
         return getargspec(self.get_undecorated_callback())[0]
 
-    def get_config(key, default=None):
+    def get_config(self, key, default=None):
         ''' Lookup a config field and return its value, first checking the
             route.config, then route.app.config.'''
         for conf in (self.config, self.app.conifg):
@@ -670,7 +675,7 @@ class Bottle(object):
                 request.path_shift(-path_depth)
 
         options.setdefault('skip', True)
-        options.setdefault('method', 'ANY')
+        options.setdefault('method', 'PROXY')
         options.setdefault('mountpoint', {'prefix': prefix, 'target': app})
         options['callback'] = mountpoint_wrapper
 
@@ -961,6 +966,13 @@ class Bottle(object):
         ''' Each instance of :class:'Bottle' is a WSGI application. '''
         return self.wsgi(environ, start_response)
 
+    def __enter__(self):
+        ''' Use this application as default for all module-level shortcuts. '''
+        default_app.push(self)
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        default_app.pop()
 
 
 
@@ -1120,17 +1132,17 @@ class BaseRequest(object):
                 header += c
                 if not c: raise err
                 if len(header) > bufsize: raise err
-            size, sep, junk = header.partition(sem)
+            size, _, _ = header.partition(sem)
             try:
                 maxread = int(tonat(size.strip()), 16)
             except ValueError:
                 raise err
             if maxread == 0: break
-            buffer = bs
+            buff = bs
             while maxread > 0:
-                if not buffer:
-                    buffer = read(min(maxread, bufsize))
-                part, buffer = buffer[:maxread], buffer[maxread:]
+                if not buff:
+                    buff = read(min(maxread, bufsize))
+                part, buff = buff[:maxread], buff[maxread:]
                 if not part: raise err
                 yield part
                 maxread -= len(part)
@@ -1637,7 +1649,7 @@ def _local_property():
 
 class LocalRequest(BaseRequest):
     ''' A thread-local subclass of :class:`BaseRequest` with a different
-        set of attribues for each thread. There is usually only one global
+        set of attributes for each thread. There is usually only one global
         instance of this class (:data:`request`). If accessed during a
         request/response cycle, this instance always refers to the *current*
         request (even on a multithreaded server). '''
@@ -1647,7 +1659,7 @@ class LocalRequest(BaseRequest):
 
 class LocalResponse(BaseResponse):
     ''' A thread-local subclass of :class:`BaseResponse` with a different
-        set of attribues for each thread. There is usually only one global
+        set of attributes for each thread. There is usually only one global
         instance of this class (:data:`response`). Its attributes are used
         to build the HTTP response at the end of the request/response cycle.
     '''
@@ -1755,13 +1767,13 @@ class _ImportRedirect(object):
 
     def find_module(self, fullname, path=None):
         if '.' not in fullname: return
-        packname, modname = fullname.rsplit('.', 1)
+        packname = fullname.rsplit('.', 1)[0]
         if packname != self.name: return
         return self
 
     def load_module(self, fullname):
         if fullname in sys.modules: return sys.modules[fullname]
-        packname, modname = fullname.rsplit('.', 1)
+        modname = fullname.rsplit('.', 1)[1]
         realname = self.impmask % modname
         __import__(realname)
         module = sys.modules[fullname] = sys.modules[realname]
@@ -1985,7 +1997,7 @@ class ConfigDict(dict):
         self._on_change = lambda name, value: None
 
     def load_config(self, filename):
-        ''' Load values from an *.ini style config file.
+        ''' Load values from an ``*.ini`` style config file.
 
             If the config file contains sections, their names are used as
             namespaces for the values within. The two special sections
@@ -2003,7 +2015,8 @@ class ConfigDict(dict):
     def load_dict(self, source, namespace=''):
         ''' Load values from a dictionary structure. Nesting can be used to
             represent namespaces.
-            
+
+            >>> c = ConfigDict()
             >>> c.load_dict({'some': {'namespace': {'key': 'value'} } })
             {'some.namespace.key': 'value'}            
         '''
@@ -2213,19 +2226,21 @@ class FileUpload(object):
     @cached_property
     def filename(self):
         ''' Name of the file on the client file system, but normalized to ensure
-            file system compatibility (lowercase, no whitespace, no path
-            separators, no unsafe characters, ASCII only). An empty filename
-            is returned as 'empty'.
+            file system compatibility. An empty filename is returned as 'empty'.
+            
+            Only ASCII letters, digits, dashes, underscores and dots are
+            allowed in the final filename. Accents are removed, if possible.
+            Whitespace is replaced by a single dash. Leading or tailing dots
+            or dashes are removed. The filename is limited to 255 characters.
         '''
-        from unicodedata import normalize #TODO: Module level import?
         fname = self.raw_filename
-        if isinstance(fname, unicode):
-            fname = normalize('NFKD', fname).encode('ASCII', 'ignore')
-        fname = fname.decode('ASCII', 'ignore')
+        if not isinstance(fname, unicode):
+            fname = fname.decode('utf8', 'ignore')
+        fname = normalize('NFKD', fname).encode('ASCII', 'ignore').decode('ASCII')
         fname = os.path.basename(fname.replace('\\', os.path.sep))
-        fname = re.sub(r'[^a-zA-Z0-9-_.\s]', '', fname).strip().lower()
-        fname = re.sub(r'[-\s]+', '-', fname.strip('.').strip())
-        return fname or 'empty'
+        fname = re.sub(r'[^a-zA-Z0-9-_.\s]', '', fname).strip()
+        fname = re.sub(r'[-\s]+', '-', fname).strip('.-')
+        return fname[:255] or 'empty'
 
     def _copy_file(self, fp, chunk_size=2**16):
         read, write, offset = self.file.read, fp.write, self.file.tell()
@@ -2293,7 +2308,7 @@ def _file_iter_range(fp, offset, bytes, maxread=1024*1024):
 
 def static_file(filename, root, mimetype='auto', download=False, charset='UTF-8'):
     """ Open a file in a safe way and return :exc:`HTTPResponse` with status
-        code 200, 305, 401 or 404. The ``Content-Type``, ``Content-Encoding``,
+        code 200, 305, 403 or 404. The ``Content-Type``, ``Content-Encoding``,
         ``Content-Length`` and ``Last-Modified`` headers are set if possible.
         Special support for ``If-Modified-Since``, ``Range`` and ``HEAD``
         requests.
@@ -2471,7 +2486,7 @@ def html_escape(string):
 
 def html_quote(string):
     ''' Escape and quote a string to be used as an HTTP attribute.'''
-    return '"%s"' % html_escape(string).replace('\n','%#10;')\
+    return '"%s"' % html_escape(string).replace('\n','&#10;')\
                     .replace('\r','&#13;').replace('\t','&#9;')
 
 
@@ -2530,6 +2545,7 @@ def auth_basic(check, realm="private", text="Access denied"):
     ''' Callback decorator to require HTTP auth (basic).
         TODO: Add route(check_auth=...) parameter. '''
     def decorator(func):
+        @functools.wraps(func)
         def wrapper(*a, **ka):
             user, password = request.auth or (None, None)
             if user is None or not check(user, password):
@@ -3324,7 +3340,7 @@ class StplParser(object):
         return ''.join(self.code_buffer)
 
     def read_code(self, multiline):
-        code_line, comment, start_line = '', '', self.lineno
+        code_line, comment = '', ''
         while True:
             m = self.re_tok.search(self.source[self.offset:])
             if not m:
@@ -3335,6 +3351,9 @@ class StplParser(object):
             code_line += self.source[self.offset:self.offset+m.start()]
             self.offset += m.end()
             _str, _com, _blk1, _blk2, _end, _cend, _nl = m.groups()
+            if code_line and (_blk1 or _blk2): # a if b else c
+                code_line += _blk1 or _blk2
+                continue
             if _str:    # Python string
                 code_line += _str
             elif _com:  # Python comment (up to EOL)
@@ -3373,6 +3392,7 @@ class StplParser(object):
             prefix = text[pos:]
             lines = prefix.splitlines(True)
             if lines[-1].endswith('\\\\\n'): lines[-1] = lines[-1][:-3]
+            elif lines[-1].endswith('\\\\\r\n'): lines[-1] = lines[-1][:-4]
             parts.append(nl.join(map(repr, lines)))
         code = '_printlist((%s,))' % ', '.join(parts)
         self.lineno += code.count('\n')+1

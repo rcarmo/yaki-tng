@@ -31,7 +31,7 @@ def redis_cache(r, prefix='url', ttl=3600):
                     response.set_header(str(h), item['headers'][h])
                 response.set_header('X-Source', 'Redis')
             except Exception as e:
-                log.debug(tb())
+                log.debug("Redis cache miss for %s" % request.urlparts.path)
                 body = callback(*args, **kwargs)
                 item = {
                     'body': body,

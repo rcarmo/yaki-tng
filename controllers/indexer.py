@@ -40,14 +40,14 @@ class Indexer():
             pass
 
         self.schema = Schema(
-            name     = ID(stored=True,unique=True),
-            title    = TEXT(stored=True,analyzer=StemmingAnalyzer()),
-            body     = TEXT(stored=True,analyzer=StemmingAnalyzer()),
-            wiki     = KEYWORD(lowercase=True, commas=True),
-            link     = KEYWORD(commas=True),
-            date     = DATETIME(stored=True),
-            modified = DATETIME(stored=True),
-            tags     = KEYWORD(stored=True,lowercase=True, commas=True)
+            name     = ID(stored=True,unique=True),                     # page name/path
+            title    = TEXT(stored=True,analyzer=StemmingAnalyzer()),   # title
+            body     = TEXT(stored=True,analyzer=StemmingAnalyzer()),   # plaintext
+            wiki     = KEYWORD(lowercase=True, commas=True),            # wiki links
+            link     = KEYWORD(commas=True),                            # other links
+            date     = DATETIME(stored=True),                           # creation date
+            modified = DATETIME(stored=True),                           # modification date
+            tags     = KEYWORD(stored=True,lowercase=True, commas=True) # tags
         )
         
         try:
