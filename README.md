@@ -5,9 +5,12 @@ A modern, revamped implementation of [Yaki][y].
 
 # Status
 
-Working, but very shy of the target feature set. I'm having to put this on ice time and time again as other things impinge upon my time, but I manage to tinker a little now and then -- that stochastic approach is one of the reasons the `master` branch isn't very stable (I usually use `git-flow`, but in this case I'll only apply it here when I'm happy with the current refactoring).
+Development is currently happening on a private Bitbucket repo and will be merged back here as time permits.
+
+All in all this is working, but very shy of the target feature set. I'm having to put this on ice time and time again as other things impinge upon my time, but I manage to tinker a little now and then -- that stochastic approach is one of the reasons the `master` branch isn't very stable (I usually use `git-flow`, but in this case I'll only apply it here when I'm happy with the current refactoring).
 
 Right now, I'm refactoring this to conform to [my usual pattern][pp] and make sure there's a cleaner separation of concerns (but there's still a little too much magic in the `yaki` library and a couple of the decorators).
+
 
 ## Main goals
 
