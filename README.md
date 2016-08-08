@@ -5,7 +5,7 @@ A modern, revamped implementation of [Yaki][y].
 
 # Status
 
-Development is currently happening on a private Bitbucket repo and will be merged back here as time permits.
+Development is currently halted in favor of [Sushy](https://github.com/rcarmo/sushy), which is a complete rewrite in a smaller, tighter codebase.
 
 All in all this is working, but very shy of the target feature set. I'm having to put this on ice time and time again as other things impinge upon my time, but I manage to tinker a little now and then -- that stochastic approach is one of the reasons the `master` branch isn't very stable (I usually use `git-flow`, but in this case I'll only apply it here when I'm happy with the current refactoring).
 
